@@ -1,5 +1,6 @@
 module mod_pos
   USE mod_precdef
+  USE mod_trajdef
   USE mod_param
   USE mod_grid
   USE mod_vel
@@ -302,6 +303,20 @@ contains
           nrj(4,ntrac)=niter
           nrj(5,ntrac)=idint(ts)
           nrj(7,ntrac)=1
+          
+          trajectories(ntrac)%iend = 2
+          trajectories(ntrac)%x1 = x1
+          trajectories(ntrac)%y1 = y1
+          trajectories(ntrac)%z1 = z1
+          trajectories(ntrac)%tt = tt
+          trajectories(ntrac)%subvol = subvol
+          trajectories(ntrac)%ib = ib
+          trajectories(ntrac)%jb = jb
+          trajectories(ntrac)%kb = kb
+          trajectories(ntrac)%niter = niter
+          trajectories(ntrac)%nts = idint(ts)
+          trajectories(ntrac)%icycle = 1
+          
           !call writedata(13)
           !cycle ntracLoop
        endif

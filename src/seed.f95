@@ -279,6 +279,7 @@ CONTAINS
                   ! Only one particle for diagnistics purposes
                   if ((loneparticle>0) .and. (ntrac.ne.loneparticle)) then 
                      nrj(6,ntrac)=1
+                     trajectories(ntrac)%iend = 1
                      cycle kkkLoop
                   endif
 
@@ -292,6 +293,19 @@ CONTAINS
                   trj(1:7,ntrac) = [ x1, y1, z1, tt,    subvol, 0.d0, tt ]
                   nrj(1:5,ntrac) = [ ib, jb, kb,  0, IDINT(ts)]
                   nrj(7,ntrac)=1
+                  
+                  trajectories(ntrac)%x1 = x1
+                  trajectories(ntrac)%y1 = y1
+                  trajectories(ntrac)%z1 = z1
+                  trajectories(ntrac)%tt = tt
+                  trajectories(ntrac)%subvol = subvol
+                  trajectories(ntrac)%t0 = tt
+                  trajectories(ntrac)%ib = ib
+                  trajectories(ntrac)%jb = jb
+                  trajectories(ntrac)%kb = kb
+                  trajectories(ntrac)%niter = 0
+                  trajectories(ntrac)%nts = IDINT(ts)
+                  trajectories(ntrac)%icycle = 1
 
                   !Save initial particle position
                   call writedata(10) !ini

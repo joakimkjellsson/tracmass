@@ -346,7 +346,7 @@ SUBROUTINE init_params
       ALLOCATE ( uvel(imt+2,jmt,km) ,vvel(imt+2,jmt,km) ,wvel(imt+2,jmt,km) )
       
       ! === Init mod_traj ===
-      ALLOCATE ( trj(NTRJ,ntracmax), nrj(NNRJ,ntracmax) )
+      ALLOCATE ( trj(NTRJ,ntracmax), nrj(NNRJ,ntracmax), trajectories(ntracmax) )
       ALLOCATE ( nexit(NEND) ) 
       nrj = 0
       trj = 0.d0

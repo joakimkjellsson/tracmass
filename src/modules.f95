@@ -6,7 +6,6 @@ MODULE mod_precdef		! Precision definitions
    integer, parameter                       :: QP = selected_real_kind(33, 4931)
 ENDMODULE mod_precdef
 
-
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_param
   USE mod_precdef
@@ -26,6 +25,22 @@ MODULE mod_param
 ENDMODULE mod_param
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
+MODULE mod_trajdef ! Define derived type "trajectory"
+   USE mod_precdef
+   TYPE trajectory
+      INTEGER                               :: ia,ja,ka,ib,jb,kb  !! grid indices
+      INTEGER                               :: nts                !! time step
+      INTEGER                               :: niter              !! trajectory iterations
+      INTEGER                               :: iend               !! 0=continue, 1=end particle
+      INTEGER                               :: icycle             !! 0=keep advecting particle
+                                                                  !! 1=stop and update model fields
+      INTEGER                               :: lbas               !! flag 
+      REAL(DP)                              :: x0,y0,z0,x1,y1,z1  !! positions
+      REAL(DP)                              :: tt,t0              !! time 
+      REAL(DP)                              :: subvol             !! volume (or mass for atm.)
+   END TYPE trajectory
+END MODULE
+
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_loopvars
   USE mod_precdef
@@ -42,6 +57,7 @@ ENDMODULE mod_loopvars
 
 MODULE mod_traj
   USE mod_precdef
+  USE mod_trajdef
   ! Variables connected to particle positions.
   INTEGER, PARAMETER                        :: NNRJ=8, NTRJ=7
   INTEGER                                   :: nend
@@ -49,6 +65,7 @@ MODULE mod_traj
   ! === Particle arrays ===
   REAL(DP), ALLOCATABLE,  DIMENSION(:,:)    :: trj
   INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: nrj 
+  TYPE(trajectory), ALLOCATABLE, DIMENSION(:) :: trajectories
   ! === Particle counters ===
   INTEGER                                   :: nout=0, nloop=0, nerror=0, nrh0=0
   INTEGER, ALLOCATABLE,DIMENSION(:)         :: nexit

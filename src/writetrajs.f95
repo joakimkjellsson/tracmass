@@ -202,6 +202,8 @@ CONTAINS
     
 subvol =  trj(5,ntrac)
 t0     =  trj(7,ntrac)
+subvol = trajectories(ntrac)%subvol
+t0     = trajectories(ntrac)%t0
 #if defined tempsalt
     call interp2(ib,jb,kb,temp,salt,dens)
 #endif
@@ -214,7 +216,14 @@ t0     =  trj(7,ntrac)
        write(58,566) ntrac,niter,x1,y1,z1,tt/tday,t0/tday,subvol,temp,salt,dens
 !       if(temp==0.) stop 4867
     case (11)
-       if(  (kriva == 1 .AND. nrj(4,ntrac) == niter-1   ) .or. &
+       !if(  (kriva == 1 .AND. nrj(4,ntrac) == niter-1   ) .or. &
+       !     (kriva == 2 .AND. scrivi                    ) .or. &
+       !     (kriva == 3                                 ) .or. &
+       !     (kriva == 4 .AND. niter == 1                ) .or. &
+       !     (kriva == 5 .AND.                                  &
+       !   &  MOD((REAL(tt)-REAL(t0))*REAL(NGCM)/REAL(ITER), 3600.) == 0.d0 ) .or. &
+       !     (kriva == 6 .AND. .not.scrivi                  ) ) then
+       if(  (kriva == 1 .AND. trajectories(ntrac)%niter == niter-1   ) .or. &
             (kriva == 2 .AND. scrivi                    ) .or. &
             (kriva == 3                                 ) .or. &
             (kriva == 4 .AND. niter == 1                ) .or. &
@@ -261,8 +270,11 @@ t0     =  trj(7,ntrac)
        ! === write last sedimentation positions ===
        open(34,file=trim(outDataDir)//trim(outDataFile)//'_sed.asc') 
        do n=1,ntracmax
-        if(nrj(1,n).ne.0) then
-         write(34,566) n,nrj(4,n),trj(1,n),trj(2,n),trj(3,n),trj(4,n)/tday,trj(7,n)/tday
+        !if(nrj(1,n).ne.0) then
+        if(trajectories(n)%ib /= 0) then
+         !write(34,566) n,nrj(4,n),trj(1,n),trj(2,n),trj(3,n),trj(4,n)/tday,trj(7,n)/tday
+         write(34,566) n,trajectories(n)%niter,trajectories(n)%x1,trajectories(n)%y1,trajectories(n)%z1, &
+                     & trajectories(n)%tt/tday,trajectories(n)%t0/tday
       endif
        enddo
        close(34)
@@ -294,7 +306,8 @@ t0     =  trj(7,ntrac)
        write(unit=78 ,rec=recPosIn) ntrac,twrite,x14,y14,z14,tt14,t014 !!Joakim edit
        return
     case (11)
-       if(  (kriva == 1 .and. nrj(4,ntrac)  ==  niter-1 ) .or. &
+       !if(  (kriva == 1 .and. nrj(4,ntrac)  ==  niter-1 ) .or. &
+       if(  (kriva == 1 .and. trajectories(ntrac)%niter  ==  niter-1 ) .or. &
             (kriva == 2 .and. scrivi                    ) .or. &
             (kriva == 3                                 ) .or. &
             (kriva == 4 .and. niter == 1                ) .or. &
@@ -353,7 +366,8 @@ t0     =  trj(7,ntrac)
        write(88,"(I0,4(',',F0.5))")  ntrac, twrite, x14, y14, z14
        return
     case (11)
-       if(  (kriva == 1 .and. nrj(4,ntrac)  ==  niter-1 ) .or. &
+       !if(  (kriva == 1 .and. nrj(4,ntrac)  ==  niter-1 ) .or. &
+       if(  (kriva == 1 .and. trajectories(ntrac)%niter  ==  niter-1 ) .or. &
             (kriva == 2 .and. scrivi                    ) .or. &
             (kriva == 3                                 ) .or. &
             (kriva == 4 .and. niter == 1                ) .or. &
