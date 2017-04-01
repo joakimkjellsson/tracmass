@@ -291,20 +291,8 @@ contains
 #ifdef sediment
        if(kb==KM-kmt(ia,ja)) then
           nsed=nsed+1
-          nrj(ntrac,6)=2
-          trj(1,ntrac)=x1
-          trj(2,ntrac)=y1
-          trj(3,ntrac)=z1
-          trj(4,ntrac)=tt
-          trj(5,ntrac)=subvol
-          nrj(1,ntrac)=ib
-          nrj(2,ntrac)=jb
-          nrj(3,ntrac)=ka
-          nrj(4,ntrac)=niter
-          nrj(5,ntrac)=idint(ts)
-          nrj(7,ntrac)=1
           
-          trajectories(ntrac)%iend = 2
+          trajectories(ntrac)%sedimented = .true. !=2 means sedimented
           trajectories(ntrac)%x1 = x1
           trajectories(ntrac)%y1 = y1
           trajectories(ntrac)%z1 = z1

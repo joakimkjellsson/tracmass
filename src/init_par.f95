@@ -346,10 +346,23 @@ SUBROUTINE init_params
       ALLOCATE ( uvel(imt+2,jmt,km) ,vvel(imt+2,jmt,km) ,wvel(imt+2,jmt,km) )
       
       ! === Init mod_traj ===
-      ALLOCATE ( trj(NTRJ,ntracmax), nrj(NNRJ,ntracmax), trajectories(ntracmax) )
+      ALLOCATE ( trajectories(ntracmax) )
+      trajectories(:)%x1 = 0.
+      trajectories(:)%y1 = 0.
+      trajectories(:)%z1 = 0.
+      trajectories(:)%tt = 0.
+      trajectories(:)%t0 = 0.
+      trajectories(:)%subvol = 0.
+      trajectories(:)%ib = 0.
+      trajectories(:)%jb = 0.
+      trajectories(:)%kb = 0.
+      trajectories(:)%nts = 0.
+      trajectories(:)%niter = 0.
+      trajectories(:)%icycle = 0.
+      trajectories(:)%active = .true.
+      trajectories(:)%sedimented = .false.
+      
       ALLOCATE ( nexit(NEND) ) 
-      nrj = 0
-      trj = 0.d0
       nexit = 0
       ntractot = 0
       numseedsubints = max(count(seedsubints /= -1), 1)

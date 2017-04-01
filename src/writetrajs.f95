@@ -200,8 +200,6 @@ CONTAINS
        !            (uvel(xf,yf+1,zf)-uvel(xf,yf-1,zf))/4000   
     !end if
     
-subvol =  trj(5,ntrac)
-t0     =  trj(7,ntrac)
 subvol = trajectories(ntrac)%subvol
 t0     = trajectories(ntrac)%t0
 #if defined tempsalt

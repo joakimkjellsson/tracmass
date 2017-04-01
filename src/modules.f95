@@ -31,13 +31,14 @@ MODULE mod_trajdef ! Define derived type "trajectory"
       INTEGER                               :: ia,ja,ka,ib,jb,kb  !! grid indices
       INTEGER                               :: nts                !! time step
       INTEGER                               :: niter              !! trajectory iterations
-      INTEGER                               :: iend               !! 0=continue, 1=end particle
       INTEGER                               :: icycle             !! 0=keep advecting particle
                                                                   !! 1=stop and update model fields
       INTEGER                               :: lbas               !! flag 
       REAL(DP)                              :: x0,y0,z0,x1,y1,z1  !! positions
       REAL(DP)                              :: tt,t0              !! time 
       REAL(DP)                              :: subvol             !! volume (or mass for atm.)
+      LOGICAL                               :: active             !! particle active or not
+      LOGICAL                               :: sedimented         !! particle sedimented or not
    END TYPE trajectory
 END MODULE
 
@@ -62,9 +63,7 @@ MODULE mod_traj
   INTEGER, PARAMETER                        :: NNRJ=8, NTRJ=7
   INTEGER                                   :: nend
   INTEGER                                   :: ntrac, ntractot=0
-  ! === Particle arrays ===
-  REAL(DP), ALLOCATABLE,  DIMENSION(:,:)    :: trj
-  INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: nrj 
+  ! === Particle arrays === 
   TYPE(trajectory), ALLOCATABLE, DIMENSION(:) :: trajectories
   ! === Particle counters ===
   INTEGER                                   :: nout=0, nloop=0, nerror=0, nrh0=0

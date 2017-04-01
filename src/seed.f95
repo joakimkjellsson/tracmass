@@ -278,8 +278,7 @@ CONTAINS
 
                   ! Only one particle for diagnistics purposes
                   if ((loneparticle>0) .and. (ntrac.ne.loneparticle)) then 
-                     nrj(6,ntrac)=1
-                     trajectories(ntrac)%iend = 1
+                     trajectories(ntrac)%active = .false.
                      cycle kkkLoop
                   endif
 
@@ -290,9 +289,9 @@ CONTAINS
                   ! ---------------------------------------------------------
                   ! --- Put the new particle into the vectors trj and nrj ---
                   ! ---------------------------------------------------------
-                  trj(1:7,ntrac) = [ x1, y1, z1, tt,    subvol, 0.d0, tt ]
-                  nrj(1:5,ntrac) = [ ib, jb, kb,  0, IDINT(ts)]
-                  nrj(7,ntrac)=1
+                  !trj(1:7,ntrac) = [ x1, y1, z1, tt,    subvol, 0.d0, tt ]
+                  !nrj(1:5,ntrac) = [ ib, jb, kb,  0, IDINT(ts)]
+                  !nrj(7,ntrac)=1
                   
                   trajectories(ntrac)%x1 = x1
                   trajectories(ntrac)%y1 = y1

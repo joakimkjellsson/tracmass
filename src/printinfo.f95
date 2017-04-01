@@ -205,7 +205,7 @@ CONTAINS
     call updateClock
     if (loneparticle>0) then
        print 798 ,ints-intstart ,trajectories(loneparticle)%x1 ,trajectories(loneparticle)%y1, &
-            trajectories(loneparticle)%z1, trajectories(loneparticle)%iend, wallmin, wallsec, loopYear, &
+            trajectories(loneparticle)%z1, trajectories(loneparticle)%active, wallmin, wallsec, loopYear, &
             loopMon, loopDay, loopHour, loopMin 
     else
        print 799 ,ints-intstart ,ntractot-nout ,nout ,nerror+nloop,ntractot, &
