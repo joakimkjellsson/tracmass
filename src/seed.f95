@@ -21,6 +21,8 @@ MODULE mod_seed
    USE mod_write, only    : writedata
    USE mod_tempsalt, only : rmax0, rmin0, tmax0, tmin0, smax0, smin0, &
                             sal, tem, rho
+   USE mod_deformation
+   
    IMPLICIT NONE
   
    INTEGER                                    :: isec,  idir
@@ -305,6 +307,11 @@ CONTAINS
                   trajectories(ntrac)%niter = 0
                   trajectories(ntrac)%nts = IDINT(ts)
                   trajectories(ntrac)%icycle = 1
+                  
+                  trajectories(ntrac)%lapu1 = lapu(ib,jb,kb,2)
+                  trajectories(ntrac)%lapu2 = lapu(ib,jb,kb,2)
+                  trajectories(ntrac)%lapv1 = lapv(ib,jb,kb,2)
+                  trajectories(ntrac)%lapv2 = lapv(ib,jb,kb,2)
 
                   !Save initial particle position
                   call writedata(10) !ini

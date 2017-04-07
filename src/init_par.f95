@@ -16,6 +16,7 @@ SUBROUTINE init_params
    USE mod_tracer
    USE mod_getfile
    USE mod_write
+   USE mod_deformation
    
 #if defined diffusion || turb 
    USE mod_diffusion
@@ -344,6 +345,14 @@ SUBROUTINE init_params
       vflux = 0.
       wflux = 0.d0
       ALLOCATE ( uvel(imt+2,jmt,km) ,vvel(imt+2,jmt,km) ,wvel(imt+2,jmt,km) )
+      
+      !! allocate deformation arrays
+      ALLOCATE ( vort(1:imt,1:jmt,1:km,2), hdiv(1:imt,1:jmt,1:km,1:2), &
+               & lapu(1:imt,1:jmt,1:km,2), lapv(1:imt,1:jmt,1:km,1:2)  )
+      vort(:,:,:,:) = 0.
+      hdiv(:,:,:,:) = 0.
+      lapu(:,:,:,:) = 0.
+      lapv(:,:,:,:) = 0.
       
       ! === Init mod_traj ===
       ALLOCATE ( trajectories(ntracmax) )

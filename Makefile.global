@@ -75,7 +75,7 @@ VPATH = src:projects/$(PROJECT):src/active_particles
 
 all: runfile
 
-objects := $(addprefix $(OBJDIR)/,modules.o savepsi.o loop_pos.o writetrajs.o \
+objects := $(addprefix $(OBJDIR)/,modules.o laplacian.o savepsi.o loop_pos.o writetrajs.o \
 	            seed.o init_seed.o sw_stat.o $(ACTVEL) getfile.o \
                     vertvel.o coord.o cross.o init_par.o time_subs.o \
                     interp.o interp2.o pos.o \

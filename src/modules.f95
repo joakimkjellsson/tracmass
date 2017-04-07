@@ -37,6 +37,8 @@ MODULE mod_trajdef ! Define derived type "trajectory"
       REAL(DP)                              :: x0,y0,z0,x1,y1,z1  !! positions
       REAL(DP)                              :: tt,t0              !! time 
       REAL(DP)                              :: subvol             !! volume (or mass for atm.)
+      REAL(DP)                              :: lapu1,lapv1        !! Laplacian of u,v at previous step
+      REAL(DP)                              :: lapu2,lapv2        !! Laplacian of u,v at next step
       LOGICAL                               :: active             !! particle active or not
       LOGICAL                               :: sedimented         !! particle sedimented or not
    END TYPE trajectory
@@ -73,6 +75,7 @@ MODULE mod_traj
   INTEGER                                   :: ib, jb, kb, ibm
   REAL(DP)                                  :: x0, y0, z0
   REAL(DP)                                  :: x1, y1, z1
+  REAL(DP)                                  :: lapu1, lapu2, lapv1, lapv2, dlapu, dlapv
 ENDMODULE mod_traj
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
@@ -578,6 +581,13 @@ ENDMODULE mod_diffusion
 #endif
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 
+MODULE mod_deformation
+   USE mod_precdef
+   !! fields describing the flow deformation
+   !! e.g. vorticity, shearing etc. 
+   REAL(DP), ALLOCATABLE, DIMENSION(:,:,:,:) :: vort, hdiv
+   REAL(DP), ALLOCATABLE, DIMENSION(:,:,:,:) :: lapu, lapv
+END MODULE mod_deformation
 
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 MODULE mod_sed

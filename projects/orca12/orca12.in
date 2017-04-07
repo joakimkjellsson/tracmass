@@ -40,7 +40,7 @@
 &INIT_GRID_TIME
    fieldsperfile =      1,
             ngcm =    120,
-            iter =      1,
+            iter =    120,
           intmax =  15330,
         minveljd =     -1,
         maxveljd =     -1,
@@ -59,7 +59,7 @@
 /
 &INIT_RUN_TIME
          intspin =      1,
-          intrun =    10,
+          intrun =    1,
 /
 &INIT_WRITE_TRAJS
       twritetype =      11,
@@ -70,9 +70,10 @@
   !                 4 = write only start and end positions
   !                 5 = write at chosen intervals
   !                 6 = write each spatial grid-crossing 
-           kriva =      6,
-      outdatadir = '/Users/joakim/Downloads/orca12/',
-     outdatafile = 'orca12_timedep_kriva6',
+           kriva =      5,
+      !outdatadir = '/group_workspaces/jasmin2/aopp/joakim/tracmass_out/orca12/',
+      outdatadir = '/Users/joakim/Downloads/tracmass_out/orca12/',
+     outdatafile = 'orca12_test',
  intmininoutfile =      0,
           intpsi =    10, ! write stream functions and tracer
 /

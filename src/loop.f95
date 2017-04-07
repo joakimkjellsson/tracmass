@@ -32,7 +32,9 @@ SUBROUTINE loop
   USE mod_streamfunctions, only: intpsi
   USE mod_tracer
   USE mod_sed
-
+  
+  USE mod_deformation
+  
   IMPLICIT none
 
   ! === Loop variables ===
@@ -210,6 +212,13 @@ SUBROUTINE loop
         ts     = DBLE(trajectories(ntrac)%nts)
         tss    = 0.d0
         
+        lapu1  = trajectories(ntrac)%lapu1
+        lapu2  = trajectories(ntrac)%lapu2
+        lapv1  = trajectories(ntrac)%lapv1
+        lapv2  = trajectories(ntrac)%lapv2
+        dlapu  = lapu2 - lapu1
+        dlapv  = lapv2 - lapv1
+        
 #ifdef rerun
         lbas = trajectories(ntrac)%lbas
         if(lbas.lt.1 .or.lbas.gt.nend) then
@@ -251,6 +260,9 @@ SUBROUTINE loop
               trajectories(ntrac)%niter  = niter
               trajectories(ntrac)%nts    = idint(ts)
               trajectories(ntrac)%icycle = 1
+              
+              trajectories(ntrac)%lapu2   = lapu(ib,jb,kb,2)
+              trajectories(ntrac)%lapv2   = lapv(ib,jb,kb,2)
               
               cycle ntracLoop
            endif

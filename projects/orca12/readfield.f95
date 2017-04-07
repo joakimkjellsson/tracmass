@@ -12,6 +12,8 @@ SUBROUTINE readfields
    USE mod_getfile
    use mod_seed
    use mod_tempsalt
+   USE mod_deformation
+   USE mod_laplacian
    
 #ifdef tempsalt
    USE mod_dens
@@ -86,6 +88,10 @@ SUBROUTINE readfields
    endif alloCondUVW
  
    call datasetswap ! Swap between current and previous step
+   vort(:,:,:,1) = vort(:,:,:,2)
+   hdiv(:,:,:,1) = hdiv(:,:,:,2)
+   lapu(:,:,:,1) = lapu(:,:,:,2)
+   lapv(:,:,:,1) = lapv(:,:,:,2)
    call updateClock 
  
 ! === Initialising fields ===
@@ -198,16 +204,47 @@ SUBROUTINE readfields
    end do
    end do
    
+   !! flip u,v upside down
+   !! use uflux, vflux as temporary arrays
+   uflux(1:imt,1:jmt,1:km,nsp) = uvel(1:imt,1:jmt,1:km)
+   vflux(1:imt,1:jmt,1:km,nsp) = vvel(1:imt,1:jmt,1:km)
+   uvel(:,:,:) = 0.
+   vvel(:,:,:) = 0.
+   do k = 1, km
+   do j = 1, jmt
+   do i = 1, imt
+      uvel(i,j,km+1-k) = uflux(i,j,k,nsp) 
+      vvel(i,j,km+1-k) = vflux(i,j,k,nsp) 
+   enddo
+   enddo
+   enddo
+   
+   !! calculate volume fluxes
    uflux(:,:,:,nsp) = 0.
    vflux(:,:,:,nsp) = 0.
    do k = 1, km
    do j = 1, jmt
    do i = 1, imt
-      uflux(i,j,km+1-k,nsp) = uvel(i,j,k) * dyu(i,j) * dzu(i,j,km+1-k,1) * zstou(i,j)
-      vflux(i,j,km+1-k,nsp) = vvel(i,j,k) * dxv(i,j) * dzv(i,j,km+1-k,1) * zstov(i,j)
+      uflux(i,j,km+1-k,nsp) = uvel(i,j,km+1-k) * dyu(i,j) * dzu(i,j,km+1-k,1) * zstou(i,j)
+      vflux(i,j,km+1-k,nsp) = vvel(i,j,km+1-k) * dxv(i,j) * dzv(i,j,km+1-k,1) * zstov(i,j)
    enddo
    enddo
    enddo
+   
+   !! calculate laplacian of u,v
+   call laplacian
+   
+   print*,imt,jmt,km
+   open(unit=111,file='uv.bin',form='unformatted')
+   write(111) uvel(1:imt,1:jmt,1:km)
+   write(111) vvel(1:imt,1:jmt,1:km)
+   close(111)
+   open(unit=111,file='lapl.bin',form='unformatted',access='direct',recl=imt*jmt*km*2*8)
+   write(111,rec=1) vort(1:imt,1:jmt,1:km,1:2)
+   write(111,rec=2) hdiv(1:imt,1:jmt,1:km,1:2)
+   write(111,rec=3) lapu(1:imt,1:jmt,1:km,1:2)
+   write(111,rec=4) lapv(1:imt,1:jmt,1:km,1:2)
+   close(111)
    
    ! Check that volume fluxes are zero below sea floor
    do i=1,IMT
