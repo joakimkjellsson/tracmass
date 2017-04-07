@@ -218,6 +218,8 @@ SUBROUTINE loop
         lapv2  = trajectories(ntrac)%lapv2
         dlapu  = lapu2 - lapu1
         dlapv  = lapv2 - lapv1
+        trajectories(ntrac)%lapu1 = lapu2
+        trajectories(ntrac)%lapv1 = lapv2
         
 #ifdef rerun
         lbas = trajectories(ntrac)%lbas

@@ -83,8 +83,10 @@ CONTAINS
     !     access='direct' ,form='unformatted' ,recl=24 ,status='replace')
     open(unit=75 ,file=trim(fullWritePref)//'_out.bin', &
          access='direct' ,form='unformatted' ,recl=32 ,status='replace') !!Joakim edit
+    !open(unit=76 ,file=trim(fullWritePref)//'_run.bin', &
+    !     access='direct' ,form='unformatted' ,recl=32 ,status='replace') !!Joakim edit
     open(unit=76 ,file=trim(fullWritePref)//'_run.bin', &
-         access='direct' ,form='unformatted' ,recl=32 ,status='replace') !!Joakim edit
+         access='direct' ,form='unformatted' ,recl=56 ,status='replace') !!Joakim edit
     open(unit=77 ,file=trim(fullWritePref)//'_kll.bin', &
          access='direct' ,form='unformatted' ,recl=32 ,status='replace') !!Joakim edit
     open(unit=78 ,file=trim(fullWritePref)//'_ini.bin', &
@@ -326,14 +328,14 @@ t0     = trajectories(ntrac)%t0
           !z14=real(salt*rb+salt2*(1-rb),kind=4)
 #endif
           recPosRun = recPosRun+1
-          write(unit=76 ,rec=recPosRun) ntrac,twrite,x14,y14,z14,tt14,t014 !!Joakim edit
+          print*,ntrac4,x14,y14,dlapu
+          write(unit=76 ,rec=recPosRun) ntrac,twrite,x14,y14,z14,tt14,t014,lapu14,lapu24,lapv14,lapv24, dlapu4, dlapv4 !!Joakim edit
        end if
     case (13)
        recPosKll = recPosKll + 1
        write(unit=77 ,rec=recPosKll) ntrac,twrite,x14,y14,z14,tt14,t014 !!Joakim edit
     case (15)
        recPosRun = recPosRun + 1
-       write(unit=76 ,rec=recPosRun) ntrac4,twrite,x14,y14,z14,tt14,t014,lapu14,lapu24,lapv14,lapv24, dlapu, dlapv !!Joakim edit
        write(unit=76 ,rec=recPosRun) ntrac4,twrite,x14,y14,z14,tt14,t014,lapu14,lapu24,lapv14,lapv24, dlapu, dlapv !!Joakim edit
     case (17) !out
        recPosOut = recPosOut + 1

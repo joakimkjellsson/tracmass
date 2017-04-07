@@ -308,9 +308,9 @@ CONTAINS
                   trajectories(ntrac)%nts = IDINT(ts)
                   trajectories(ntrac)%icycle = 1
                   
-                  trajectories(ntrac)%lapu1 = lapu(ib,jb,kb,2)
+                  trajectories(ntrac)%lapu1 = lapu(ib,jb,kb,1)
                   trajectories(ntrac)%lapu2 = lapu(ib,jb,kb,2)
-                  trajectories(ntrac)%lapv1 = lapv(ib,jb,kb,2)
+                  trajectories(ntrac)%lapv1 = lapv(ib,jb,kb,1)
                   trajectories(ntrac)%lapv2 = lapv(ib,jb,kb,2)
 
                   !Save initial particle position
