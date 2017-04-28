@@ -39,6 +39,8 @@ MODULE mod_trajdef ! Define derived type "trajectory"
       REAL(DP)                              :: subvol             !! volume (or mass for atm.)
       REAL(DP)                              :: lapu1,lapv1        !! Laplacian of u,v at previous step
       REAL(DP)                              :: lapu2,lapv2        !! Laplacian of u,v at next step
+      REAL(DP)                              :: vort1,hdiv1        !! Vorticity, div of u,v at previous step
+      REAL(DP)                              :: vort2,hdiv2        !! Vort, div of u,v at next step
       LOGICAL                               :: active             !! particle active or not
       LOGICAL                               :: sedimented         !! particle sedimented or not
    END TYPE trajectory
@@ -75,7 +77,7 @@ MODULE mod_traj
   INTEGER                                   :: ib, jb, kb, ibm
   REAL(DP)                                  :: x0, y0, z0
   REAL(DP)                                  :: x1, y1, z1
-  REAL(DP)                                  :: lapu1, lapu2, lapv1, lapv2, dlapu, dlapv
+  REAL(DP)                                  :: lapu1, lapu2, lapv1, lapv2, dlapu, dlapv, vort1, vort2, hdiv1, hdiv2, dvort, dhdiv
 ENDMODULE mod_traj
 ! ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===   ===
 

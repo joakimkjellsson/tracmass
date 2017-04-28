@@ -86,7 +86,7 @@ CONTAINS
     !open(unit=76 ,file=trim(fullWritePref)//'_run.bin', &
     !     access='direct' ,form='unformatted' ,recl=32 ,status='replace') !!Joakim edit
     open(unit=76 ,file=trim(fullWritePref)//'_run.bin', &
-         access='direct' ,form='unformatted' ,recl=56 ,status='replace') !!Joakim edit
+         access='direct' ,form='unformatted' ,recl=72 ,status='replace') !!Joakim edit
     open(unit=77 ,file=trim(fullWritePref)//'_kll.bin', &
          access='direct' ,form='unformatted' ,recl=32 ,status='replace') !!Joakim edit
     open(unit=78 ,file=trim(fullWritePref)//'_ini.bin', &
@@ -165,7 +165,7 @@ CONTAINS
     INTEGER*8, SAVE                      :: recPosKll=0
     INTEGER*4                            :: ntrac4
     REAL*4                               :: x14 ,y14 ,z14, tt14, t014
-    REAL*4                               :: lapu14 ,lapv14 ,lapu24, lapv24, dlapu4, dlapv4
+    REAL*4                               :: lapu14 ,lapv14 ,lapu24, lapv24, dlapu4, dlapv4, vort24, hdiv24, dvort4, dhdiv4
     REAL*8                               :: twrite
     ! === Variables to interpolate fields ===
     REAL                                       :: temp, salt, dens
@@ -299,8 +299,12 @@ t0     = trajectories(ntrac)%t0
     lapu24 = real(lapu2,kind=4)!Joakim edit
     lapv14 = real(lapv1,kind=4)!Joakim edit
     lapv24 = real(lapv2,kind=4)!Joakim edit
+    vort24 = real(vort2,kind=4)!Joakim edit
+    hdiv24 = real(hdiv2,kind=4)!Joakim edit
     dlapu4 = real(dlapu,kind=4)!Joakim edit
     dlapv4 = real(dlapv,kind=4)!Joakim edit
+    dvort4 = real(dvort,kind=4)!Joakim edit
+    dhdiv4 = real(dhdiv,kind=4)!Joakim edit
     if (twritetype==1) then
        twrite = tt
     else if (twritetype==2) then
@@ -329,14 +333,16 @@ t0     = trajectories(ntrac)%t0
 #endif
           recPosRun = recPosRun+1
           print*,ntrac4,x14,y14,dlapu
-          write(unit=76 ,rec=recPosRun) ntrac,twrite,x14,y14,z14,tt14,t014,lapu14,lapu24,lapv14,lapv24, dlapu4, dlapv4 !!Joakim edit
+          write(unit=76 ,rec=recPosRun) ntrac,twrite,x14,y14,z14,tt14,t014,&
+                                        lapu14,lapu24,lapv14,lapv24,dlapu4,dlapv4,vort24,hdiv24,dvort4,dhdiv4 !!Joakim edit
        end if
     case (13)
        recPosKll = recPosKll + 1
        write(unit=77 ,rec=recPosKll) ntrac,twrite,x14,y14,z14,tt14,t014 !!Joakim edit
     case (15)
        recPosRun = recPosRun + 1
-       write(unit=76 ,rec=recPosRun) ntrac4,twrite,x14,y14,z14,tt14,t014,lapu14,lapu24,lapv14,lapv24, dlapu, dlapv !!Joakim edit
+       write(unit=76 ,rec=recPosRun) ntrac4,twrite,x14,y14,z14,tt14,t014,&
+                                     lapu14,lapu24,lapv14,lapv24, dlapu, dlapv, vort24, hdiv24, dvort4, dhdiv4 !!Joakim edit
     case (17) !out
        recPosOut = recPosOut + 1
        write(unit=77 ,rec=recPosOut) ntrac,twrite,x14,y14,z14,tt14,t014 !!Joakim edit

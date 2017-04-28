@@ -216,10 +216,19 @@ SUBROUTINE loop
         lapu2  = trajectories(ntrac)%lapu2
         lapv1  = trajectories(ntrac)%lapv1
         lapv2  = trajectories(ntrac)%lapv2
+        hdiv1  = trajectories(ntrac)%hdiv1
+        hdiv2  = trajectories(ntrac)%hdiv2
+        vort1  = trajectories(ntrac)%vort1
+        vort2  = trajectories(ntrac)%vort2
         dlapu  = lapu2 - lapu1
         dlapv  = lapv2 - lapv1
+        dhdiv  = hdiv2 - hdiv1
+        dvort  = vort2 - vort1
+        ! put new step statistics as current
         trajectories(ntrac)%lapu1 = lapu2
         trajectories(ntrac)%lapv1 = lapv2
+        trajectories(ntrac)%hdiv1 = hdiv2
+        trajectories(ntrac)%vort1 = vort2
         
 #ifdef rerun
         lbas = trajectories(ntrac)%lbas
@@ -265,6 +274,8 @@ SUBROUTINE loop
               
               trajectories(ntrac)%lapu2   = lapu(ib,jb,kb,2)
               trajectories(ntrac)%lapv2   = lapv(ib,jb,kb,2)
+              trajectories(ntrac)%hdiv2   = hdiv(ib,jb,kb,2)
+              trajectories(ntrac)%vort2   = vort(ib,jb,kb,2)
               
               cycle ntracLoop
            endif
