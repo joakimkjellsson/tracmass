@@ -229,6 +229,7 @@ SUBROUTINE loop
         trajectories(ntrac)%lapv1 = lapv2
         trajectories(ntrac)%hdiv1 = hdiv2
         trajectories(ntrac)%vort1 = vort2
+        print*,'ntrac',trajectories(ntrac)%ib,trajectories(ntrac)%jb,trajectories(ntrac)%kb
         
 #ifdef rerun
         lbas = trajectories(ntrac)%lbas

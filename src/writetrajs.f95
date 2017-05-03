@@ -204,8 +204,6 @@ CONTAINS
        !            (uvel(xf,yf+1,zf)-uvel(xf,yf-1,zf))/4000   
     !end if
     
-subvol = trajectories(ntrac)%subvol
-t0     = trajectories(ntrac)%t0
 #if defined tempsalt
     call interp2(ib,jb,kb,temp,salt,dens)
 #endif

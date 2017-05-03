@@ -52,7 +52,7 @@ SUBROUTINE init_seed()
             IF (mask(ji,jj) .ne. 0) THEN 
                DO jk=kst1,kst2
                   numsd = numsd+1
-                  seed_ijk (numsd,1:3) = [ ji, jj, jk ]
+                  seed_ijk (numsd,1:3) = [ ji, jj, jk ]               
                   seed_set (numsd,1:2) = [ isec, idir ]
                END DO
             ELSE
