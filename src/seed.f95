@@ -87,7 +87,6 @@ CONTAINS
          ikst  = seed_ijk (jsd,3)
          isec  = seed_set (jsd,1)
          idir  = seed_set (jsd,2)
-         print*,'seed 1',iist,ijst,ikst
          if (iist <   1) cycle startLoop
          if (ijst <   1) cycle startLoop
          if (iist > imt) cycle startLoop
@@ -255,7 +254,6 @@ CONTAINS
                      x1 = DBLE (ibm)  + 0.25d0 * (DBLE(jjt)-0.5d0) / DBLE(ijt)
                      y1 = DBLE (jb-1) + 0.25d0 * (DBLE(jkt)-0.5d0) / DBLE(ikt)
                      z1 = DBLE (kb-1) + 0.5d0
-                     print*,'seed 2',ntrac,x1,y1,z1,subvol
 
                   CASE (5)                  
                      x1 = seed_xyz (jsd,1)
@@ -279,7 +277,6 @@ CONTAINS
                   ! Update trajectory numbers
                   ntractot = ntractot+1
                   ntrac = ntractot
-                  print*,'seed 3',ntrac,x1,y1,z1,subvol
 
                   ! Only one particle for diagnistics purposes
                   if ((loneparticle>0) .and. (ntrac.ne.loneparticle)) then 

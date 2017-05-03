@@ -255,6 +255,9 @@ contains
 #if defined stream_thermohaline
 ! calculate the layers of temperature and salinity for both a-box and b-box
        call interp2(ib,jb,kb,temp,salt,dens)
+       mrb=int((dens-rmin)/dr)+1 !!joakim edit
+       if(mrb.lt.1 ) mrb=1 !!joakim edit
+       if(mrb.gt.MR) mrb=MR !!joakim edit
        mtb=int((temp-tmin)/dtemp)+1
        if(mtb.lt.1 ) mtb=1
        if(mtb.gt.MR) mtb=MR
@@ -312,6 +315,9 @@ contains
 #if defined stream_thermohaline
 ! calculate the layers of temp and salt for both a-box and b-box
        call interp2(ib,jb,kb,temp,salt,dens)
+       mrb=int((dens-rmin)/dr)+1 !!joakim edit                                                                                
+       if(mrb.lt.1 ) mrb=1 !!joakim edit                                                     
+       if(mrb.gt.MR) mrb=MR !!joakim edit  
        mtb=int((temp-tmin)/dtemp)+1
        if(mtb.lt.1 ) mtb=1
        if(mtb.gt.MR) mtb=MR
