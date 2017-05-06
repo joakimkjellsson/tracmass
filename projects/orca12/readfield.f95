@@ -233,19 +233,7 @@ SUBROUTINE readfields
    
    !! calculate laplacian of u,v
    call laplacian
-   
-   print*,imt,jmt,km
-   open(unit=111,file='uv.bin',form='unformatted')
-   write(111) uvel(1:imt,1:jmt,1:km)
-   write(111) vvel(1:imt,1:jmt,1:km)
-   close(111)
-   open(unit=111,file='lapl.bin',form='unformatted',access='direct',recl=imt*jmt*km*2*8)
-   write(111,rec=1) vort(1:imt,1:jmt,1:km,1:2)
-   write(111,rec=2) hdiv(1:imt,1:jmt,1:km,1:2)
-   write(111,rec=3) lapu(1:imt,1:jmt,1:km,1:2)
-   write(111,rec=4) lapv(1:imt,1:jmt,1:km,1:2)
-   close(111)
-   
+      
    ! Check that volume fluxes are zero below sea floor
    do i=1,IMT
    do j=1,JMT
