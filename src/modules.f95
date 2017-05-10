@@ -1,7 +1,6 @@
 
 
 MODULE mod_precdef		! Precision definitions
-   !integer, parameter                       :: P4 = selected_real_kind(6, 37)
    integer, parameter                       :: DP = selected_real_kind(15, 307)
    integer, parameter                       :: QP = selected_real_kind(33, 4931)
 ENDMODULE mod_precdef
@@ -139,6 +138,7 @@ MODULE mod_grid
   INTEGER                                   :: subGridKmin=1 ,subGridKmax=0
   CHARACTER(LEN=200)                        :: SubGridFile 
   INTEGER                                   :: degrade_space=0
+  INTEGER                                   :: freeSurfaceForm
 
 #ifdef ifs
   REAL(DP), PARAMETER                       :: R_d = 287.05d0

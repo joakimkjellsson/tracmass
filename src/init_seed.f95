@@ -27,11 +27,11 @@ SUBROUTINE init_seed()
    CHARACTER(LEN=200)                         :: fullSeedFile
    CHARACTER(LEN=*), PARAMETER                :: xyzform = "(3f10.2,2i6,i12)"
    CHARACTER(LEN=*), PARAMETER                :: timform = "(42x      ,i12)"
-#if ! defined baltix && ! defined rco
-   CHARACTER(LEN=*), PARAMETER                :: ijkform = "(6i6)"
-#else
-   CHARACTER(LEN=*), PARAMETER                :: ijkform = "(3i10,  2i6,i12)"
-#endif
+!#if ! defined baltix && ! defined rco
+!   CHARACTER(LEN=*), PARAMETER                :: ijkform = "(6i6)"
+!#else
+   CHARACTER(LEN=*), PARAMETER                :: ijkform = "(3i10, i6, i12)"
+!#endif
    LOGICAL                                    :: fileexists
 
    !-------------------------------------------------------------------------
@@ -117,6 +117,7 @@ SUBROUTINE init_seed()
                                               seed_ijk(jsd,3), &
                                               seed_set(jsd,1), & 
                                               seed_set(jsd,2)
+                  print*,seed_ijk(jsd,:),seed_set(jsd,:)
                END DO
             CASE(2)
                DO jsd = 1,nsdMax
