@@ -117,7 +117,6 @@ SUBROUTINE init_seed()
                                               seed_ijk(jsd,3), &
                                               seed_set(jsd,1), & 
                                               seed_set(jsd,2)
-                  print*,seed_ijk(jsd,:),seed_set(jsd,:)
                END DO
             CASE(2)
                DO jsd = 1,nsdMax
