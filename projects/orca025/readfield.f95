@@ -11,6 +11,8 @@ SUBROUTINE readfields
   USE mod_traj
   USE mod_getfile
   use mod_seed
+  USE mod_deformation
+  USE mod_laplacian
 
 #ifdef tempsalt
 !  USE mod_dens
@@ -230,7 +232,10 @@ end if
    enddo
    enddo
    enddo
-
+   
+   !! calculate laplacian of u,v                                   
+   call laplacian 
+   
 #ifdef drifter
 ! average velocity/transport over surface drifter drogue depth to simulate drifter trajectories
 kbot=59 ; ktop=60 ! number of surface layers to integrat over
