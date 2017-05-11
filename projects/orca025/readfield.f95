@@ -205,13 +205,13 @@ end if
 #endif     
    
    dmult=1.  ! amplification of the velocity amplitude by simple multiplication
-   temp3d_simp = get3DfieldNC(trim(fieldFile)//'U.nc', 'vozocrtx')
+   uvel(1:imt,1:jmt,km:1:-1) = get3DfieldNC(trim(fieldFile)//'U.nc', 'vozocrtx')
    !! calculate volume fluxes                                                                                                              
    uflux(:,:,:,nsp) = 0.
    do k = 1, km      
    do j = 1, jmt
    do i = 1, imt
-      uflux(i,j,km+1-k,nsp) = temp3d_simp(i,j,k) * dyu(i,j) * dzu(i,j,km+1-k,1) * zstou(i,j)
+      uflux(i,j,km+1-k,nsp) = uvel(i,j,km+1-k) * dyu(i,j) * dzu(i,j,km+1-k,1) * zstou(i,j)
    enddo
    enddo
    enddo
@@ -222,17 +222,17 @@ end if
       ! vflux(i,JMT,:,2)=-vflux(ii,JMT-3,:,2)
    enddo
    
-   temp3d_simp = get3DfieldNC(trim(fieldFile)//'V.nc', 'vomecrty')
+   vvel(1:imt,1:jmt,km:1:-1) = get3DfieldNC(trim(fieldFile)//'V.nc', 'vomecrty')
    !! calculate volume fluxes                                                                                                 
    vflux(:,:,:,nsp) = 0.
    do k = 1, km
    do j = 1, jmt
    do i = 1, imt
-      vflux(i,j,km+1-k,nsp) = temp3d_simp(i,j,k) * dxv(i,j) * dzv(i,j,km+1-k,1) * zstov(i,j)
+      vflux(i,j,km+1-k,nsp) = vvel(i,j,km+1-k) * dxv(i,j) * dzv(i,j,km+1-k,1) * zstov(i,j)
    enddo
    enddo
    enddo
-   
+  
    !! calculate laplacian of u,v                                   
    call laplacian 
    
