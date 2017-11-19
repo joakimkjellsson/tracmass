@@ -74,6 +74,8 @@ CONTAINS
             END IF
          END DO findTime
       END IF
+
+      if ((ints-intstart-1)/8 .ne. real((ints-intstart-1))/8) return
       
       ! ---------------------------------------
       ! --- Loop over the seed size, nsdMax ---

@@ -41,6 +41,7 @@ SUBROUTINE readfields
 #endif
 
   REAL*4, ALLOCATABLE, DIMENSION(:,:)         	:: temp2d_simp
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:),SAVE    :: u_m, v_m
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:)       	:: temp3d_simp
   REAL(DP), ALLOCATABLE, DIMENSION(:,:)         :: zstot,zstou,zstov,abyst,abysu,abysv
   REAL*4 										:: dd,dmult,uint,vint,zint
@@ -127,7 +128,16 @@ end if
    ntime=10000*currYear+100*currMon+currDay
    
    ! ------------------------------------------------------------
-   
+   if (ints == intstart) then
+   !! Read mean
+   if(.not. allocated (u_m)) then
+   allocate ( u_m(imt,jmt,km), v_m(imt,jmt,km) )
+   u_m(1:imt,1:jmt,1:km) = get3DfieldNC('/group_workspaces/jasmin2/aopp/joakim/ORCA025-N401/mean/ORCA025-N401_1978-2010m00U.nc',&
+                            & 'vozocrtx')
+   v_m(1:imt,1:jmt,1:km) = get3DfieldNC('/group_workspaces/jasmin2/aopp/joakim/ORCA025-N401/mean/ORCA025-N401_1978-2010m00V.nc',&
+                            & 'vomecrty')   
+   end if
+   end if
    ! === Find the file for this timestep ===
    
    !dataprefix='xxxx/ORCA025-N112_xxxxxxxx'
@@ -206,11 +216,25 @@ end if
    
    dmult=1.  ! amplification of the velocity amplitude by simple multiplication
    uvel(1:imt,1:jmt,km:1:-1) = get3DfieldNC(trim(fieldFile)//'U.nc', 'vozocrtx')
-   !! calculate volume fluxes                                                                                                              
+   !print*,'uvel 1:5',uvel(867,664,1:5)
+   !print*,'uvel 70:75',uvel(867,664,70:75)
+   !print*,'u_m 1:5',u_m(867,664,1:5)
+   !print*,'u_m 70:75',u_m(867,664,70:75)
+   !uvel(1:imt,1:jmt,1:km) = uvel(1:imt,1:jmt,1:km) - u_m(1:imt,1:jmt,km:1:-1)
+   !print*,'uvel 1:5',uvel(867,664,1:5)
+   !print*,'uvel 70:75',uvel(867,664,70:75)
+   !stop
+   !! calculate volume fluxes                                                                                                 
+             
    uflux(:,:,:,nsp) = 0.
+   print*,u_m(648,118,3)
    do k = 1, km      
    do j = 1, jmt
    do i = 1, imt
+      !if (i==648 .and. j==118) print*,'uvel',uvel(i,j,km+1-k),u_m(i,j,k)
+      !print*,'uvel',uvel(i,j,km+1-k),u_m(i,j,k),i,j,k,size(u_m,1)
+      uvel(i,j,km+1-k) = uvel(i,j,km+1-k) - u_m(i,j,k)                                                        
+      !if (i==648 .and. j==118) print*,'uvel',uvel(i,j,km+1-k) 
       uflux(i,j,km+1-k,nsp) = uvel(i,j,km+1-k) * dyu(i,j) * dzu(i,j,km+1-k,1) * zstou(i,j)
    enddo
    enddo
@@ -223,11 +247,13 @@ end if
    enddo
    
    vvel(1:imt,1:jmt,km:1:-1) = get3DfieldNC(trim(fieldFile)//'V.nc', 'vomecrty')
+   
    !! calculate volume fluxes                                                                                                 
    vflux(:,:,:,nsp) = 0.
    do k = 1, km
    do j = 1, jmt
    do i = 1, imt
+      vvel(i,j,km+1-k) = vvel(i,j,km+1-k) - v_m(i,j,k)
       vflux(i,j,km+1-k,nsp) = vvel(i,j,km+1-k) * dxv(i,j) * dzv(i,j,km+1-k,1) * zstov(i,j)
    enddo
    enddo
@@ -235,6 +261,7 @@ end if
   
    !! calculate laplacian of u,v                                   
    call laplacian 
+   
    
 #ifdef drifter
 ! average velocity/transport over surface drifter drogue depth to simulate drifter trajectories

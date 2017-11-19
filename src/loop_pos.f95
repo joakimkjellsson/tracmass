@@ -10,7 +10,8 @@ module mod_pos
   USE mod_psi
   USE mod_tempsalt
   USE mod_traj, only: ntrac
-
+  USE mod_active_particles, only: upr
+  
   IMPLICIT none
   
 contains
@@ -34,6 +35,7 @@ contains
        scrivi=.false.
        uu=(intrpbg*uflux(ia,ja,ka,nsp)+intrpb*uflux(ia ,ja,ka,nsm))*ff
        if(uu.gt.0.d0) then
+       !if (uu+upr(1,1) > 0.d0) then
           ib=ia+1
           if(ib.gt.IMT) ib=ib-IMT 
        endif
@@ -84,6 +86,7 @@ contains
        scrivi=.false.
        uu=(intrpbg*uflux(iam,ja,ka,nsp)+intrpb*uflux(iam,ja,ka,nsm))*ff
        if(uu.lt.0.d0) then
+       !if(uu+upr(1,1) < 0.d0) then
           ib=iam
        endif
        x1=dble(iam)
@@ -133,6 +136,7 @@ contains
        scrivi=.false.
        uu=(intrpbg*vflux(ia,ja,ka,nsp)+intrpb*vflux(ia,ja,ka,nsm))*ff
        if(uu.gt.0.d0) then
+       !if (uu+upr(3,1) > 0.d0) then
           jb=ja+1
        endif
        y1=dble(ja)
@@ -181,6 +185,7 @@ contains
        scrivi=.false.
        uu=(intrpbg*vflux(ia,ja-1,ka,nsp)+intrpb*vflux(ia,ja-1,ka,nsm))*ff
        if(uu.lt.0.d0) then
+       !if (uu+upr(3,1) < 0.d0) then
           jb=ja-1
 #ifndef ifs 
         if(jb==0) stop 34578
@@ -362,12 +367,13 @@ contains
        if(dse==UNDEF .and. dsw==UNDEF .and. dsn==UNDEF .and. & 
           dss==UNDEF .and. dsu==UNDEF .and. dsd==UNDEF ) then       
           ib=ia ; jb=ja ; kb=ka
-       endif
-!       else
+       else
+          !print*,'hej3',ia,ja,ka,x0,y0,z0
           call pos_orgn(1,ia,ja,ka,x0,x1,ds) ! zonal crossing 
           call pos_orgn(2,ia,ja,ka,y0,y1,ds) ! merid. crossing 
           call pos_orgn(3,ia,ja,ka,z0,z1,ds) ! vert. crossing 
-!       endif
+          !print*,'hej4',ib,jb,kb,x1,y1,z1
+       endif
 #endif
     endif
     

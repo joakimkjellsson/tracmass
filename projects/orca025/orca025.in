@@ -7,10 +7,10 @@
         gridname = 'ORCA025',
       gridsource = 'http://www.locean-ipsl.upmc.fr/opa/ORCA_mesh.html',
         griddesc = '1/4 deg run for the global Ocean.',
-       indatadir = '/Users/joakim/data/ORCA025-N401/',
+       indatadir = '/group_workspaces/jasmin2/nemo/vol1/ORCA025-N401/',
 /
 &INIT_CASE_DESCRIPTION
-        casename = 'ORCA025-SMB01',
+        casename = 'ORCA025-N401',
         casedesc = 'Global Ocean trajectories',
 /
 &INIT_GRID_SIZE
@@ -19,10 +19,11 @@
               km =     75,
              nst =      2,
          subgrid =      1,
-     subgridimin =   1033 !1111,
-     subgridimax =   1200 !1322,
-     subgridjmin =   167 !258,
-     subgridjmax =   333 ! 399,
+!!             indian+pacific, south pacific, south atlantic, agulhas
+     subgridimin =   100, !429,!602,!1033 !1111,
+     subgridimax =   934, !829,!808,!1200 !1322,
+     subgridjmin =     1, !116,!116,!167 !258,
+     subgridjmax =   376, !323,!253,!333 ! 399,
      subgridfile = '/Users/bror/svn/orm/grd/templ.asc',
        subgridid =      1,
 /
@@ -38,7 +39,7 @@
 &INIT_GRID_TIME
    fieldsperfile =      1,
             ngcm =    120,
-            iter =     12,
+            iter =    1,
           intmax = 250000000,
         minveljd =     -1,
         maxveljd =     -1,
@@ -57,13 +58,14 @@
 /
 &INIT_RUN_TIME
          intspin =      1,
-          intrun =      1,
+          intrun =      73,
 /
 &INIT_WRITE_TRAJS
       twritetype =     11,
-           kriva =      5,
-      outdatadir = '/Users/joakim//Downloads/tracmass_out/orca025/',
-     outdatafile = 'orca025_test_surf',
+           kriva =      1,
+      outdatadir = '/group_workspaces/jasmin2/aopp/joakim/tracmass_out/orca025/',
+     !outdatafile = 'orca025_test_3',
+     outdatafile = 'orca025_param_test_impl18_kappa-0.1',
 /
 &INIT_SEEDING
              nff =      1,
@@ -71,19 +73,19 @@
             idir =      0,
             nqua =      1,
        partquant =      1,
-        ntracmax =  10000,
+        ntracmax = 100000,
     loneparticle =     -1,
         seedtype =      2,
-            ist1 =    100,
-            ist2 =    150,
-            jst1 =     66,
-            jst2 =     84,
-            kst1 =     75,
-            kst2 =     75,
+            ist1 =    417,
+            ist2 =    417,
+            jst1 =    188,
+            jst2 =    188,
+            kst1 =     42,
+            kst2 =     42,
             tst1 =     -1,
             tst2 =     -1,
-         seeddir =    '/Users/joakim/Downloads/',
-        seedfile =    'start_south_pacific_orca025.txt',
+         seeddir =    '/group_workspaces/jasmin2/aopp/joakim/tracmass_in/',
+        seedfile =    'start_south_pacific_2_lev64_orca025_close.txt',
      varseedfile =      0,
         seedtime =      0,
          seedall =      0,
@@ -93,12 +95,12 @@
 /
 &INIT_KILLZONES
             nend =      5,
-            ienw =   -1,  211,   -1,   -1,
-            iene =    1, 1000, 1000, 1000,
-            jens =    1,    1,    1,  141,
-            jenn =  700,  700,    1,  141,
+            ienw =  -1,  833,   -1,   -1, ! -1,399,  -1,  -1, !-1,  166,   -1,   -1,
+            iene =   1,  900, 1500, 1500, !  1,1000,1000,1000, ! 1, 1000, 1000, 1000,
+            jens =   1,    1,    1,  375, !  1,   1,   1, 206, ! 1,    1,    1,  165,
+            jenn = 700,  700,    1,  375, !700, 700,   1, 206, !700,  700,    1,  165,
 !            timax = 70.0,
-           timax = 3650000.0,
+           timax = 365.0,
 /
 &INIT_TEMP_SALT
            tmin0 = -500.0,

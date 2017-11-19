@@ -38,6 +38,7 @@ MODULE mod_trajdef ! Define derived type "trajectory"
       REAL(DP)                              :: subvol             !! volume (or mass for atm.)
       REAL(DP)                              :: lapu1,lapv1        !! Laplacian of u,v at previous step
       REAL(DP)                              :: lapu2,lapv2        !! Laplacian of u,v at next step
+      REAL(DP)                              :: dlapu,dlapv        !! d/dt Laplacian of u,v 
       REAL(DP)                              :: vort1,hdiv1        !! Vorticity, div of u,v at previous step
       REAL(DP)                              :: vort2,hdiv2        !! Vort, div of u,v at next step
       LOGICAL                               :: active             !! particle active or not

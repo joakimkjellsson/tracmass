@@ -212,23 +212,29 @@ SUBROUTINE loop
         ts     = DBLE(trajectories(ntrac)%nts)
         tss    = 0.d0
         
-        lapu1  = trajectories(ntrac)%lapu1
-        lapu2  = trajectories(ntrac)%lapu2
-        lapv1  = trajectories(ntrac)%lapv1
-        lapv2  = trajectories(ntrac)%lapv2
-        hdiv1  = trajectories(ntrac)%hdiv1
-        hdiv2  = trajectories(ntrac)%hdiv2
-        vort1  = trajectories(ntrac)%vort1
-        vort2  = trajectories(ntrac)%vort2
-        dlapu  = lapu2 - lapu1
-        dlapv  = lapv2 - lapv1
-        dhdiv  = hdiv2 - hdiv1
-        dvort  = vort2 - vort1
+        !! at start of a new time step, calc laplacian u and v
+        !! and remember the old value
+        !! The next four lines are laplacian of volume fluxes
+        !trajectories(ntrac)%lapu1   = trajectories(ntrac)%lapu2
+        !trajectories(ntrac)%lapv1   = trajectories(ntrac)%lapv2
+        !trajectories(ntrac)%lapu2   = lapu(ib,jb,kb,1) 
+        !trajectories(ntrac)%lapv2   = lapv(ib,jb,kb,1) 
+        !! Here we translate laplacian of volume flux to velocity
+        lapu1  = trajectories(ntrac)%lapu1 / (dyu(ib,jb) * dzt(ib,jb,kb,1))   
+        lapu2  = trajectories(ntrac)%lapu2 / (dyu(ib,jb) * dzt(ib,jb,kb,1))
+        lapv1  = trajectories(ntrac)%lapv1 / (dxv(ib,jb) * dzt(ib,jb,kb,1))      
+        lapv2  = trajectories(ntrac)%lapv2 / (dxv(ib,jb) * dzt(ib,jb,kb,1))
+        !dlapu = trajectories(ntrac)%dlapu
+        !dlapv = trajectories(ntrac)%dlapv
+        !dhdiv  = hdiv2 - hdiv1
+        !dvort  = vort2 - vort1
+        !trajectories(ntrac)%dlapu = dlapu
+        !trajectories(ntrac)%dlapv = dlapv
         ! put new step statistics as current
-        trajectories(ntrac)%lapu1 = lapu2
-        trajectories(ntrac)%lapv1 = lapv2
-        trajectories(ntrac)%hdiv1 = hdiv2
-        trajectories(ntrac)%vort1 = vort2
+        !trajectories(ntrac)%lapu1 = lapu2
+        !trajectories(ntrac)%lapv1 = lapv2
+        !trajectories(ntrac)%hdiv1 = hdiv2
+        !trajectories(ntrac)%vort1 = vort2
         
 #ifdef rerun
         lbas = trajectories(ntrac)%lbas
@@ -272,10 +278,10 @@ SUBROUTINE loop
               trajectories(ntrac)%nts    = idint(ts)
               trajectories(ntrac)%icycle = 1
               
-              trajectories(ntrac)%lapu2   = lapu(ib,jb,kb,2)
-              trajectories(ntrac)%lapv2   = lapv(ib,jb,kb,2)
-              trajectories(ntrac)%hdiv2   = hdiv(ib,jb,kb,2)
-              trajectories(ntrac)%vort2   = vort(ib,jb,kb,2)
+              !trajectories(ntrac)%lapu2   = lapu(ib,jb,kb,2)
+              !trajectories(ntrac)%lapv2   = lapv(ib,jb,kb,2)
+              !trajectories(ntrac)%hdiv2   = hdiv(ib,jb,kb,2)
+              !trajectories(ntrac)%vort2   = vort(ib,jb,kb,2)
               
               cycle ntracLoop
            endif
@@ -341,6 +347,7 @@ SUBROUTINE loop
            dsmin=dtmin/dxyz
 #endif /*regulardt*/ 
            call active_niter 
+           
            !call turbuflux(ia,ja,ka,dt)
            ! === calculate the vertical velocity ===
            call vertvel(ia,iam,ja,ka)
@@ -360,9 +367,13 @@ SUBROUTINE loop
            if (errCode.ne.0) cycle ntracLoop
            call calc_time
            
+           if (ntrac == 365) print*,'ds',ds,dse,dsw,dsn,dss,dsu,dsd,dsmin
+           if (ntrac == 365) print*,'hej1',x0,y0,z0,ia,ja,ka
+           
            ! === calculate the new positions of the particle ===    
            call pos(ia,iam,ja,ka,ib,jb,kb,x0,y0,z0,x1,y1,z1)
            !call errorCheck('longjump', errCode)
+           if (ntrac == 365) print*,'hej2',x1,y1,z1,ib,jb,kb
 
            if (nperio == 6) then
               ! === north fold cyclic for the ORCA grids ===
@@ -440,7 +451,11 @@ SUBROUTINE loop
            
            if (ja>jmt) ja = jmt - (ja - jmt)
            if (jb>jmt) jb = jmt - (jb - jmt)
-
+           
+           call active_niter_2 !!joakim edit
+           
+           if (ntrac == 365) print*,'hej3',x1,y1,z1,ib,jb,kb
+           
            call errorCheck('boundError', errCode)
            if (errCode.ne.0) cycle ntracLoop
            call errorCheck('landError', errCode)
@@ -683,6 +698,9 @@ return
                 call print_ds
                 print *,'dxyz=',dxyz,' dxdy=',dxdy(ib,jb),dxdy(ia,ja)
                 print *,'hs=',hs(ia,ja,nsm),hs(ia,ja,nsp),hs(ib,jb,nsm),hs(ib,jb,nsp)
+                print *,'uflux=',uflux(ia,ja,ka,nsm),uflux(ia,ja,ka,nsp),uflux(ib,jb,kb,nsm),uflux(ib,jb,kb,nsp)
+                print *,'vflux=',vflux(ia,ja,ka,nsm),vflux(ia,ja,ka,nsp),vflux(ib,jb,kb,nsm),vflux(ib,jb,kb,nsp)
+                print *,'kmt=',kmt(ia-1,ja),kmt(ia,ja),kmt(ia+1,ja),kmt(ia,ja-1),kmt(ia,ja+1)
                 print *,'tt=',tt,ts,tt/tday,t0/tday
                 print *,'ntrac=',ntrac
                 print *,'niter=',niter
@@ -698,7 +716,7 @@ return
              errCode = -40             
              call writedata(40)
              trajectories(ntrac)%active = .false.
-             if (strict==1) stop 
+             !if (strict==1) stop  !!joakim edit
           endif
           case ('coordboxError')
           ! ===  Check that coordinates belongs to   ===
@@ -746,7 +764,7 @@ return
               print *,'ntrac=',ntrac,niter 
               nerror=nerror+1
  !             trajectories(ntrac)%iend = 1
-              stop 3957
+              !stop 3957
               z1=dble(KM-kmt(ib,jb))+0.5d0
               errCode = -49
            end if

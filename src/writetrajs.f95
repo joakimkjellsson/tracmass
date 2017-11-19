@@ -4,6 +4,7 @@ module mod_write
   USE mod_time, only: intstart,ints
   USE mod_name, only: casename, case, Project
   USE mod_time 
+  USE mod_active_particles, only: upr !!Joakim edit
  ! USE mod_traj, only: ib,jb,kb
 
   IMPLICIT NONE
@@ -165,7 +166,8 @@ CONTAINS
     INTEGER*8, SAVE                      :: recPosKll=0
     INTEGER*4                            :: ntrac4
     REAL*4                               :: x14 ,y14 ,z14, tt14, t014
-    REAL*4                               :: lapu14 ,lapv14 ,lapu24, lapv24, dlapu4, dlapv4, vort24, hdiv24, dvort4, dhdiv4
+    REAL*4                               :: lapu14 ,lapv14 ,lapu24, lapv24, dlapu4, dlapv4, vort24, hdiv24, &
+                                            dvort4, dhdiv4, upr4, vpr4
     REAL*8                               :: twrite
     ! === Variables to interpolate fields ===
     REAL                                       :: temp, salt, dens
@@ -303,6 +305,8 @@ CONTAINS
     dlapv4 = real(dlapv,kind=4)!Joakim edit
     dvort4 = real(dvort,kind=4)!Joakim edit
     dhdiv4 = real(dhdiv,kind=4)!Joakim edit
+    upr4   = real(upr(1,1),kind=4)!Joakim edit
+    vpr4   = real(upr(3,1),kind=4)!Joakim edit
     if (twritetype==1) then
        twrite = tt
     else if (twritetype==2) then
@@ -330,9 +334,8 @@ CONTAINS
           !z14=real(salt*rb+salt2*(1-rb),kind=4)
 #endif
           recPosRun = recPosRun+1
-          print*,ntrac4,x14,y14,dlapu
           write(unit=76 ,rec=recPosRun) ntrac,twrite,x14,y14,z14,tt14,t014,&
-                                        lapu14,lapu24,lapv14,lapv24,dlapu4,dlapv4,vort24,hdiv24,dvort4,dhdiv4 !!Joakim edit
+                                        lapu14,lapu24,lapv14,lapv24,upr4,vpr4,vort24,hdiv24,dvort4,dhdiv4 !!Joakim edit
        end if
     case (13)
        recPosKll = recPosKll + 1
@@ -340,7 +343,7 @@ CONTAINS
     case (15)
        recPosRun = recPosRun + 1
        write(unit=76 ,rec=recPosRun) ntrac4,twrite,x14,y14,z14,tt14,t014,&
-                                     lapu14,lapu24,lapv14,lapv24, dlapu, dlapv, vort24, hdiv24, dvort4, dhdiv4 !!Joakim edit
+                                     lapu14,lapu24,lapv14,lapv24, upr4, vpr4, vort24,hdiv24,dvort4,dhdiv4 !!Joakim edit
     case (17) !out
        recPosOut = recPosOut + 1
        write(unit=77 ,rec=recPosOut) ntrac,twrite,x14,y14,z14,tt14,t014 !!Joakim edit
