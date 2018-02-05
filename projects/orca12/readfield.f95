@@ -49,6 +49,7 @@ SUBROUTINE readfields
    REAL(DP), ALLOCATABLE, DIMENSION(:,:)         :: zstot,zstou,zstov,abyst,abysu,abysv
    REAL(DP), ALLOCATABLE, DIMENSION(:,:,:)       :: xxx
    REAL*4                                      :: dd,hu,hv,uint,vint,zint,hh,h0
+   REAL*4, ALLOCATABLE, DIMENSION(:,:,:),SAVE    :: u_m, v_m
   
 #ifdef initxyt
    INTEGER, PARAMETER                            :: NTID=73
@@ -66,6 +67,19 @@ SUBROUTINE readfields
    LOGICAL                                       :: around
  
 !---------------------------------------------------------------
+
+#ifdef nomean
+if (ints == intstart) then
+   !! Read mean  
+   if(.not. allocated (u_m)) then
+   allocate ( u_m(imt,jmt,km), v_m(imt,jmt,km) )
+   u_m(1:imt,1:jmt,1:km) = get3DfieldNC('/group_workspaces/jasmin2/aopp/joakim/ORCA0083-N001/mean/ORCA0083-N01_1978-2010m00U.nc',&
+                            & 'vozocrtx')
+   v_m(1:imt,1:jmt,1:km) = get3DfieldNC('/group_workspaces/jasmin2/aopp/joakim/ORCA0083-N001/mean/ORCA0083-N01_1978-2010m00V.nc',&
+                            & 'vomecrty')
+   end if
+end if
+#endif
 
 #ifdef initxyt
    ! 
@@ -203,11 +217,25 @@ SUBROUTINE readfields
    end do
    end do
    end do
-   
+
+#ifdef nomean   
    !! flip u,v upside down
    !! use uflux, vflux as temporary arrays
-   uflux(1:imt,1:jmt,1:km,nsp) = uvel(1:imt,1:jmt,1:km)
-   vflux(1:imt,1:jmt,1:km,nsp) = vvel(1:imt,1:jmt,1:km)
+   where (uvel == 0)
+      u_m = 0
+   end where
+   where (vvel == 0)
+      v_m = 0
+   end where
+   
+   uflux(1:imt,1:jmt,1:km,nsp) = uvel(1:imt,1:jmt,1:km) - u_m(1:imt,1:jmt,1:km)
+   vflux(1:imt,1:jmt,1:km,nsp) = vvel(1:imt,1:jmt,1:km) - v_m(1:imt,1:jmt,1:km)
+
+#else
+   uflux(1:imt,1:jmt,1:km,nsp) = uvel(1:imt,1:jmt,1:km) 
+   vflux(1:imt,1:jmt,1:km,nsp) = vvel(1:imt,1:jmt,1:km) 
+#endif
+      
    uvel(:,:,:) = 0.
    vvel(:,:,:) = 0.
    do k = 1, km

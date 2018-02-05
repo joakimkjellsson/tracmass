@@ -39,7 +39,7 @@
 #------------------------------------------------------------------------
   fl23  = -Dturb           # Adds subgrid turbulent velocities 
 #  fl24  = -Dadd_lapu_adv   # Adds laplacian(u) * nabla(u) to turb
-   fl24  = -Dadd_lapu_adv2
+  fl24  = -Dadd_lapu_adv2  
 #  fl24  = -Ddiffusion      # Adds a diffusion on trajectory
 #  fl25  = -Danisodiffusion # Adds an anisotropic diffusion on trajectory
 #------------------------------------------------------------------------

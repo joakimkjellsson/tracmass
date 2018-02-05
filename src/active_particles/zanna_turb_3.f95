@@ -11,7 +11,7 @@ MODULE mod_active_particles
   IMPLICIT none
 
   REAL                                       :: upr(12,2) = 0.0
-  REAL                                       :: kappa = -0.1
+  REAL                                       :: kappa = -0.5
   REAL(DP), ALLOCATABLE, DIMENSION(:,:)      :: mem_param
   REAL(DP), ALLOCATABLE, DIMENSION(:)        :: lapu_b, lapv_b, lapu_n, lapv_n, dlapu_n, dlapv_n, dt_n
   REAL(DP), DIMENSION(4)                     :: test_sum

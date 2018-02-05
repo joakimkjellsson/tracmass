@@ -43,6 +43,7 @@ SUBROUTINE setupgrid
    map3D    = [2, 3,  4, 1 ]
    ncTpos   = 1
    
+      
    !
    ! --- Read dx, dy at T points --- 
    !
