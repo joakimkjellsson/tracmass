@@ -8,18 +8,18 @@
       gridsource = 'http://www.nemo-ocean.eu/',
         griddesc = '1/60 deg run for the Agulhas.',
        indatadir = '/sfs/fs1/work-geomar/smomw355/hlrn_hannover_sync/smomw244/shkrschu/gfs2/work/shkrschu/SDIR/INALT60.L120/INALT60.L120-KRS0020-S/',
-     !topoDataDir = '/Users/joakim/data/ORCA0083-N001/domain/',
+     topoDataDir = '/sfs/fs1/work-geomar/smomw355/hlrn_hannover_sync/smomw244/shkrschu/gfs2/work/shkrschu/SDIR/INALT60.L120/INALT60.L120-KRS0020-S/',
 /
 &INIT_CASE_DESCRIPTION
         casename = 'INALT60',
         casedesc = 'Agulhas trajectories',
 /
 &INIT_GRID_SIZE
-             imt =   4320,
-             jmt =   3059,
-              km =     75,
+             imt =   2404,
+             jmt =   1483,
+              km =    120,
              nst =      2,
-         subgrid =      1,
+         subgrid =      0,
      subgridimin =    3529,
      subgridimax =    3725,
      subgridjmin =    2279,
@@ -34,12 +34,12 @@
         basehour =      0,
          baseday =      1,
          basemon =      1,
-        baseyear =   2001,
+        baseyear =   2010,
         jdoffset =      0,
 /
 &INIT_GRID_TIME
    fieldsperfile =      1,
-            ngcm =    120,
+            ngcm =      4,
             iter =      5,
           intmax =  15330,
         minveljd =     -1,
@@ -48,10 +48,10 @@
 &INIT_START_DATE
         startsec =      0,
         startmin =      0,
-       starthour =     12,
-        startday =      4,
-        startmon =      7,
-       startyear =   2001,
+       starthour =      0,
+        startday =      1,
+        startmon =      1,
+       startyear =   2010,
           noleap =  .true., 
          startjd =      0,
           intmin =      1,

@@ -21,9 +21,8 @@ SUBROUTINE readfields
 #endif
    IMPLICIT none
    ! ==========================================================================
-   ! === Read velocity, temperature and salinity for ORCA0083 configuration ===
+   ! === Read velocity, temperature and salinity for INALT60.L120 configuration ===
    ! ==========================================================================
-   ! Subroutine to read the ocean state from ORCA0083 config
    ! Run each time step
    ! --------------------------------------------------------------------------
    ! The following arrays will be populated:
@@ -50,14 +49,6 @@ SUBROUTINE readfields
    REAL(DP), ALLOCATABLE, DIMENSION(:,:,:)       :: xxx
    REAL*4                                      :: dd,hu,hv,uint,vint,zint,hh,h0
    REAL*4, ALLOCATABLE, DIMENSION(:,:,:),SAVE    :: u_m, v_m
-  
-#ifdef initxyt
-   INTEGER, PARAMETER                            :: NTID=73
-   INTEGER, PARAMETER                            :: IJKMAX2=7392 ! for distmax=0.25 and 32 days
-
-   INTEGER,  SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: ntimask
-   REAL*4, SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: trajinit
-#endif
    
 #ifdef tempsalt
    REAL*4, ALLOCATABLE, DIMENSION(:)           :: rhozvec, depthzvec, latvec
@@ -67,29 +58,6 @@ SUBROUTINE readfields
    LOGICAL                                       :: around
  
 !---------------------------------------------------------------
-
-#ifdef nomean
-if (ints == intstart) then
-   !! Read mean  
-   if(.not. allocated (u_m)) then
-   allocate ( u_m(imt,jmt,km), v_m(imt,jmt,km) )
-   print*,' Read mean fields '
-   u_m(1:imt,1:jmt,1:km) = get3DfieldNC('/group_workspaces/jasmin2/aopp/joakim/ORCA0083-N001/mean/ORCA0083-N01_1978-2010m00U.nc',&
-                            & 'vozocrtx')
-   v_m(1:imt,1:jmt,1:km) = get3DfieldNC('/group_workspaces/jasmin2/aopp/joakim/ORCA0083-N001/mean/ORCA0083-N01_1978-2010m00V.nc',&
-                            & 'vomecrty')
-   end if
-end if
-#endif
-
-#ifdef initxyt
-   ! 
-   ! Allocate variables necessary for drifter simulation
-   !
-   alloCondGrid: if ( .not. allocated (ntimask) ) then
-      allocate ( ntimask(NTID,IJKMAX2,3) , trajinit(NTID,IJKMAX2,3) )
-   endif alloCondGrid
-#endif
    
    !
    ! Allocate variables 
@@ -110,46 +78,24 @@ end if
    call updateClock 
  
 ! === Initialising fields ===
-   initFieldcond: if(ints == intstart) then
    
-#ifdef initxyt
-      ! Time for individual start positions
-      if(IJKMAX2 == 7392) open(84,file=trim(inDataDir)//'topo/masktime_32_025', &
-                               form='unformatted')
-      read(84) trajinit
-      close(84)
-      j=0
-      do k=1,NTID
-         do i=1,IJKMAX2
-            if(trajinit(k,i,3) /= 0.) then
-               j=j+1
-#if orca025l75h6
-               trajinit(k,i,3)=float(kst2)-0.5
-               !   print *,j,trajinit(k,i,:)
-#endif
-            endif
-         enddo
-      enddo
-      ijkst=0
-      if(j /= IJKMAX2) then
-         stop 4396
-      endif
-#endif
-   
-   endif initFieldcond
+   ! 
+   ! One file every five days, so calculate next 5 days  
+   !
+   nextFileDay = lastFileDay + 5
+   nextFileMon = 
    
    !
    ! Find the files for the current step
    ! 
+   dataprefix='2_INALT60.L120-KRS0020_4h_xxxxxxxx_xxxxxxxx'
    dataprefix='xxxx/ORCA0083-N06_xxxxxxxx'
-   write(dataprefix(1:4),'(i4)')   currYear
-   write(dataprefix(19:26),'(i4,i2.2,i2.2)') currYear,currMon,currDay
-   fieldFile = trim(inDataDir)//'means/'//trim(dataprefix)//'d05'
-   medfieldFile = trim(inDataDir)//'medusa/'//trim(dataprefix)//'d05'
-   !fieldFile = trim(inDataDir)//'means/2000/ORCA0083-N01_20000105d05'
+   write(dataprefix(27:34),'(i4,i2.2,i2.2)') currYear,currMon,currDay
+   write(dataprefix(36:43),'(i4,i2.2,i2.2)') currYear_p5,currMon_p5,currDay_p5
+   fieldFile = trim(inDataDir)//trim(dataprefix)
    
    ! Read SSH
-   hs(:,     :, nsp) = get2DfieldNC(trim(fieldFile)//'T.nc', 'ssh')
+   hs(:,     :, nsp) = get2DfieldNC(trim(fieldFile)//'_grid_T.nc', 'ssh')
    hs(imt+1, :, nsp) = hs(1,:,nsp)
    
    ! Depth at U, V, T points as 2D arrays

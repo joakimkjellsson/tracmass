@@ -38,7 +38,7 @@ SUBROUTINE init_params
 ! Setup namelists
    namelist /INIT_NAMELIST_VERSION/ gridVerNum
    namelist /INIT_GRID_DESCRIPTION/ GCMname, GCMsource, gridName, gridSource,&
-                                    griddesc, inDataDir!, topoDataDir !!joakim
+                                    griddesc, inDataDir, topoDataDir !!joakim
    namelist /INIT_CASE_DESCRIPTION/ caseName, caseDesc
    namelist /INIT_GRID_SIZE/        imt, jmt, km, nst, subGrid, subGridImin, &
                                     subGridImax, subGridJmin, subGridJmax,   &

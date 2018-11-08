@@ -48,7 +48,7 @@ SUBROUTINE setupgrid
    ! --- Read dx, dy at T points --- 
    !
    allocate ( e1t(imt,jmt) , e2t(imt,jmt) )
-   gridFile = trim(inDataDir)//'domain/mesh_hgr.nc'
+   gridFile = trim(topoDataDir)//'2_INALT60.L120-KRS0020_mesh_mask.*'
    e1t  = get2DfieldNC(gridFile, 'e1t')
    e2t  = get2DfieldNC(gridFile, 'e2t')
    dxdy(1:imt,1:jmt) = e1t(1:imt,1:jmt) * e2t(1:imt,1:jmt)
@@ -66,7 +66,7 @@ SUBROUTINE setupgrid
    ! Read dz at T points without considering 
    ! bottom partial cells and variable volume  
    !
-   gridFile = trim(inDataDir)//'domain/mesh_zgr.nc'
+   gridFile = trim(topoDataDir)//'2_INALT60.L120-KRS0020_mesh_mask.*'
    dz = get1DfieldNC(gridFile, 'e3t_1d')
    do k=1,km
       kk=km+1-k
