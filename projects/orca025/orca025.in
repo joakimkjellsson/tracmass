@@ -19,11 +19,10 @@
               km =     75,
              nst =      2,
          subgrid =      1,
-!!             indian+pacific, south pacific, south atlantic, agulhas
-     subgridimin =   100, !429,!602,!1033 !1111,
-     subgridimax =   934, !829,!808,!1200 !1322,
-     subgridjmin =     1, !116,!116,!167 !258,
-     subgridjmax =   376, !323,!253,!333 ! 399,
+     subgridimin =   1071,
+     subgridimax =   1164,
+     subgridjmin =    787,
+     subgridjmax =    835,
      subgridfile = '/Users/bror/svn/orm/grd/templ.asc',
        subgridid =      1,
 /
@@ -39,7 +38,7 @@
 &INIT_GRID_TIME
    fieldsperfile =      1,
             ngcm =    120,
-            iter =    1,
+            iter =      1,
           intmax = 250000000,
         minveljd =     -1,
         maxveljd =     -1,
@@ -51,42 +50,40 @@
         startday =      5,
         startmon =      1,
        startyear =   2000,
-        !jdoffset =      3,
+        !jdoffset =     3,
           noleap =  .true.,
-         startjd =      -1,
+         startjd =     -1,
           intmin =      1,
 /
 &INIT_RUN_TIME
          intspin =      1,
-          intrun =     74,
+          intrun =   1460,
 /
 &INIT_WRITE_TRAJS
       twritetype =     11,
            kriva =      1,
-      outdatadir = '/group_workspaces/jasmin2/aopp/joakim/tracmass_out/orca025/',
-     outdatafile = 'orca025_param_test_zturb4_kappa-0.2_lev75_diffusivity_sfclock',
-     !outdatafile = 'orca025_param_test_zturb4_kappa-0.2_addlap',
-     !outdatafile = 'orca025_south_pacific_2_lev75_diffusivity'
+      outdatadir = '/group_workspaces/jasmin2/aopp/joakim/tracmass_out/',
+     outdatafile = 'orca025_overflow_back',
 /
 &INIT_SEEDING
              nff =      1,
-            isec =      4,
-            idir =      0,
+            isec =      2,
+            idir =      1,
             nqua =      1,
        partquant =      1,
         ntracmax = 400000,
     loneparticle =     -1,
-        seedtype =      2, !2, !! seedType=1 use ist,jst. seedType=2 use seedfile
-            ist1 =      2,
-            ist2 =    832,
-            jst1 =      2,
-            jst2 =    373,
-            kst1 =     64,
-            kst2 =     64,
+        seedtype =      1, !2, !! seedType=1 use ist,jst. seedType=2 use seedfile
+            ist1 =     43, !subgridimin=821
+            ist2 =     43, 
+            jst1 =      7, !subgridjmin=612
+            jst2 =      9,
+            kst1 =      1,
+            kst2 =     75,
             tst1 =     -1,
             tst2 =     -1,
          seeddir =    '/group_workspaces/jasmin2/aopp/joakim/tracmass_in/',
-        seedfile =    'start_south_pacific_2_diffusivity_lev75_orca025_close.txt', !'start_south_pacific_2_lev64_orca025_close.txt',
+        seedfile =    'start_south_pacific_2_lev64_orca025_close.txt',
      varseedfile =      0,
         seedtime =      0,
          seedall =      0,
@@ -96,12 +93,11 @@
 /
 &INIT_KILLZONES
             nend =      5,
-            ienw =  -1,  833,   -1,   -1, ! -1,399,  -1,  -1, !-1,  166,   -1,   -1,
-            iene =   1,  900, 1500, 1500, !  1,1000,1000,1000, ! 1, 1000, 1000, 1000,
-            jens =   1,    1,    1,  374, !  1,   1,   1, 206, ! 1,    1,    1,  165,
-            jenn = 700,  700,    1,  374, !700, 700,   1, 206, !700,  700,    1,  165,
-!            timax = 70.0,
-           timax = 365.0,
+            ienw =      1,   92,    1,    1,
+            iene =      2,   93, 1000, 1000,
+            jens =      1,    1,    1,   47,
+            jenn =   1000, 1000,    2,   48,
+            timax = 730.0, ! days
 /
 &INIT_TEMP_SALT
            tmin0 = -500.0,

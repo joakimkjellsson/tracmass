@@ -46,10 +46,15 @@ SUBROUTINE setupgrid
    !
    ! --- Read dx, dy at T points --- 
    !
-   allocate ( e1t(imt,jmt) , e2t(imt,jmt) )
+   print*,'setupgrid: set up dx,dy ',imt,jmt
+   allocate ( e1t(imt+2,jmt) , e2t(imt+2,jmt) )
    gridFile = trim(inDataDir)//'domain/mesh_hgr.nc'
-   e1t  = get2DfieldNC(gridFile, 'e1t')
-   e2t  = get2DfieldNC(gridFile, 'e2t')
+   print*,'read e1t, e2t from '//trim(gridFile)
+   print*,'shape of e1t',shape(e1t),shape(e2t)
+   e1t  = get2DfieldNC(trim(gridFile), 'e1t')
+   print*,'e1t',e1t,size(e1t,1),size(e1t,2)
+   e2t  = get2DfieldNC(trim(gridFile), 'e2t')
+   print*,'e2t',e2t,size(e2t,1),size(e2t,2)
    dxdy(1:imt,1:jmt) = e1t(1:imt,1:jmt) * e2t(1:imt,1:jmt)
    deallocate ( e1t, e2t )
   
@@ -65,6 +70,7 @@ SUBROUTINE setupgrid
    ! Read dz at T points without considering 
    ! bottom partial cells and variable volume  
    !
+   print*,'setupgrid: set up dz'
    gridFile = trim(inDataDir)//'domain/mesh_zgr.nc'
    dz = get1DfieldNC(gridFile, 'e3t_0')
    dz(1:km) = dz(km:1:-1)
@@ -78,6 +84,7 @@ SUBROUTINE setupgrid
    ! Read number of valid levels at U, V, T points
    ! as 2D array
    !
+   print*,'setupgrid: set up bathymetry'
    kmt = get2DfieldNC(gridFile, 'mbathy')
    allocate ( kmu(imt,jmt), kmv(imt,jmt) )
    
@@ -104,6 +111,7 @@ SUBROUTINE setupgrid
    !
    ! SSH variability is accounted for in readfield each time step
    !
+   print*,'setupgrid: set up layer thickness'
    allocate ( dzu(imt,jmt,km,2),dzv(imt,jmt,km,2), dzt0(imt,jmt,km) )
    
    dzt0(:,:,:) = get3DfieldNC(gridFile, 'e3t')
