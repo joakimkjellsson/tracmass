@@ -43,7 +43,12 @@ SUBROUTINE init_params
    namelist /INIT_GRID_SIZE/        imt, jmt, km, nst, subGrid, subGridImin, &
                                     subGridImax, subGridJmin, subGridJmax,   &
                                     subGridKmin, subGridKmax, SubGridFile,   &
-                                    subGridID, nperio, freeSurfaceForm
+                                    subGridID, nperio, freeSurfaceForm,      &
+                                    coordFile, hgridFile, zgridFile, bathyFile, &
+                                    dx_name, dy_name, dxv_name, dyu_name,    &
+                                    dz_1D_name, dzt_3D_name, dzu_3D_name,    &
+                                    kBathy_name,                             &
+                                    dzv_3D_name, gridIsUpsideDown, read3Ddz
    namelist /INIT_BASE_TIME/        baseSec, baseMin, baseHour, baseDay,     &
                                     baseMon, baseYear, jdoffset
    namelist /INIT_GRID_TIME/        fieldsPerFile, ngcm, iter, intmax,       &
@@ -92,7 +97,7 @@ SUBROUTINE init_params
          projdir = 'projects/'//trim(Project)
       end if
    end if
-
+   
    OPEN (8,file=trim(projdir)//'/'//trim(Project)//'.in',    &
         & status='OLD', delim='APOSTROPHE')
    ! -- Check if the namefiles has correct version number. 

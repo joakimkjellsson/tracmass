@@ -2,24 +2,24 @@
       gridvernum =      6,
 /
 &INIT_GRID_DESCRIPTION
-         gcmname = 'NEMO-AGRIF',
+         gcmname = 'NEMO',
        gcmsource = 'http://www.nemo-ocean.eu/',
-        gridname = 'INALT60.L120',
+        gridname = 'ORCA12',
       gridsource = 'http://www.nemo-ocean.eu/',
-        griddesc = '1/60 deg run for the Agulhas.',
-       indatadir = '/sfs/fs1/work-geomar/smomw355/hlrn_hannover_sync/smomw244/shkrschu/gfs2/work/shkrschu/SDIR/INALT60.L120/INALT60.L120-KRS0020-S/',
-     topoDataDir = '/sfs/fs1/work-geomar/smomw355/hlrn_hannover_sync/smomw244/shkrschu/gfs2/work/shkrschu/SDIR/INALT60.L120/INALT60.L120-KRS0020-S/',
+        griddesc = '1/12 deg run for the global Ocean.',
+       indatadir = '/group_workspaces/jasmin2/nemo/vol1/ORCA0083-N006/',
+     !topoDataDir = '/Users/joakim/data/ORCA0083-N001/domain/',
 /
 &INIT_CASE_DESCRIPTION
-        casename = 'INALT60',
-        casedesc = 'Agulhas trajectories',
+        casename = 'ORCA12',
+        casedesc = 'Global Ocean trajectories',
 /
 &INIT_GRID_SIZE
-             imt =   2404,
-             jmt =   1483,
-              km =     53,
+             imt =   4320,
+             jmt =   3059,
+              km =     75,
              nst =      2,
-         subgrid =      0,
+         subgrid =      1,
      subgridimin =    3529,
      subgridimax =    3725,
      subgridjmin =    2279,
@@ -34,13 +34,13 @@
         basehour =      0,
          baseday =      1,
          basemon =      1,
-        baseyear =   2010,
+        baseyear =   2001,
         jdoffset =      0,
 /
 &INIT_GRID_TIME
    fieldsperfile =      1,
-            ngcm =      4,
-            iter =      1,
+            ngcm =    120,
+            iter =      5,
           intmax =  15330,
         minveljd =     -1,
         maxveljd =     -1,
@@ -48,17 +48,17 @@
 &INIT_START_DATE
         startsec =      0,
         startmin =      0,
-       starthour =      2,
-        startday =      1,
-        startmon =      1,
-       startyear =   2010,
+       starthour =     12,
+        startday =      4,
+        startmon =      7,
+       startyear =   2001,
           noleap =  .true., 
          startjd =      0,
           intmin =      1,
 /
 &INIT_RUN_TIME
          intspin =      1,
-          intrun =   6000,
+          intrun =     73,
 /
 &INIT_WRITE_TRAJS
       twritetype =      11,
@@ -69,9 +69,9 @@
   !                 4 = write only start and end positions
   !                 5 = write at chosen intervals
   !                 6 = write each spatial grid-crossing 
-           kriva =      1,
-      outdatadir = '/sfs/fs1/work-geomar/smomw352/',
-     outdatafile = 'inalt60_test',
+           kriva =      5,
+      outdatadir = '/group_workspaces/jasmin2/aopp/joakim/tracmass_out/orca12/',
+     outdatafile = 'orca12_baltic',
  intmininoutfile =      0,
           intpsi =    10, ! write stream functions and tracer
 /
@@ -84,12 +84,12 @@
         ntracmax = 20000000,
     loneparticle =      0, !2964,
         seedtype =      1,
-            ist1 =   1935,
-            ist2 =   2390,
-            jst1 =   1458,
-            jst2 =   1458,
-            kst1 =      1,
-            kst2 =     53,
+            ist1 =     45,
+            ist2 =     49,
+            jst1 =     63,
+            jst2 =     67,
+            kst1 =     75,
+            kst2 =     75,
             tst1 =     -1,
             tst2 =     -1,
          seeddir =    ' ',
@@ -103,10 +103,10 @@
 /
 &INIT_KILLZONES
             nend =      5,
-            ienw =   -1, 2402,   -1,   -1,
-            iene =    2, 3000, 3000, 3000,
-            jens =    1,    1,    1, 1481,
-            jenn = 2000, 2000,    2, 2000,
+            ienw =   -1,  196,   -1,   -1,
+            iene =    1, 1000, 1000, 1000,
+            jens =    1,    1,    1,  355,
+            jenn =  400,  400,    1,  355,
 !            timax = 70.0,
            timax = 3650000.0,
 /

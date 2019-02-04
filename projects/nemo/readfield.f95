@@ -21,8 +21,9 @@ SUBROUTINE readfields
 #endif
    IMPLICIT none
    ! ==========================================================================
-   ! === Read velocity, temperature and salinity for INALT60.L120 configuration ===
+   ! === Read velocity, temperature and salinity for ORCA0083 configuration ===
    ! ==========================================================================
+   ! Subroutine to read the ocean state from ORCA0083 config
    ! Run each time step
    ! --------------------------------------------------------------------------
    ! The following arrays will be populated:
@@ -39,29 +40,94 @@ SUBROUTINE readfields
    
    ! = Loop variables
    INTEGER                                       :: i, j, k ,kk, im, ip, jm, jp, imm, ii, jmm, jpp, l
-   INTEGER                                       :: kbot,ktop 
-   INTEGER, SAVE                                 :: itime, fieldStep
+   INTEGER                                       :: kbot,ktop
+   INTEGER                                       :: ichar, itime, fieldStep
    INTEGER, SAVE                                 :: ntempus=0,ntempusb=0,nread
    ! = Variables used for getfield procedures
-   CHARACTER (len=200)                           :: fieldFile, medfieldFile, timestamp, tmpstr
+   CHARACTER (len=200)                           :: fieldFile, medfieldFile, fileSuffix
+   CHARACTER (len=200)                           :: prefixForm, tFile, uFile, vFile
+   CHARACTER (len=100)                           :: tGridName, uGridName, vGridName, idGCM, tmpstr
    ! = Variables for filename generation
-   CHARACTER (len=200)                           :: dataprefix
+   CHARACTER (len=200)                           :: dataprefix, timestamp
+   CHARACTER (len=50), DIMENSION(30)             :: dataprefix2
    REAL(DP), ALLOCATABLE, DIMENSION(:,:)         :: zstot,zstou,zstov,abyst,abysu,abysv
    REAL(DP), ALLOCATABLE, DIMENSION(:,:,:)       :: xxx
    REAL*4                                      :: dd,hu,hv,uint,vint,zint,hh,h0
    REAL*4, ALLOCATABLE, DIMENSION(:,:,:),SAVE    :: u_m, v_m
    
+   INTEGER, ALLOCATABLE, DIMENSION(:,:),SAVE          :: fileMon, fileDay
+   CHARACTER (len=200), ALLOCATABLE, DIMENSION(:),SAVE :: file_timestamp
+   
+#ifdef initxyt
+   INTEGER, PARAMETER                            :: NTID=73
+   INTEGER, PARAMETER                            :: IJKMAX2=7392 ! for distmax=0.25 and 32 days
+
+   INTEGER,  SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: ntimask
+   REAL*4, SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: trajinit
+#endif
+   
 #ifdef tempsalt
    REAL*4, ALLOCATABLE, DIMENSION(:)           :: rhozvec, depthzvec, latvec
    REAL*4, ALLOCATABLE, DIMENSION(:)           :: tmpzvec, salzvec
 #endif
-   
-   INTEGER, ALLOCATABLE, DIMENSION(:,:),SAVE          :: fileMon, fileDay
-   CHARACTER (len=200), ALLOCATABLE, DIMENSION(:),SAVE :: file_timestamp
-    
+
    LOGICAL                                       :: around
  
 !---------------------------------------------------------------
+
+if (ints == intstart) then
+#ifdef nomean
+   !! Read mean  
+   if(.not. allocated (u_m)) then
+   allocate ( u_m(imt,jmt,km), v_m(imt,jmt,km) )
+   print*,' Read mean fields '
+   u_m(1:imt,1:jmt,1:km) = get3DfieldNC('/group_workspaces/jasmin2/aopp/joakim/ORCA0083-N001/mean/ORCA0083-N01_1978-2010m00U.nc',&
+                            & 'vozocrtx')
+   v_m(1:imt,1:jmt,1:km) = get3DfieldNC('/group_workspaces/jasmin2/aopp/joakim/ORCA0083-N001/mean/ORCA0083-N01_1978-2010m00V.nc',&
+                            & 'vomecrty')
+   end if
+#endif
+   
+      ! INALT60 data with 4h frequency
+      allocate( file_timestamp(16), fileDay(16,2), fileMon(16,2) )
+      fileDay(1:16,1) = (/  1,  6, 31, 25, 22, 16, 11,  5, 30, 25, 19, 13,  8,  2, 27, 22 /)
+      fileDay(1:16,2) = (/  5, 30, 24, 21, 15, 10,  4, 29, 24, 18, 12,  7,  1, 26, 21, 31 /)
+      fileMon(1:16,1) = (/  1,  1,  1,  2,  3,  4,  5,  6,  6,  7,  8,  9, 10, 11, 11, 12 /)
+      fileMon(1:16,2) = (/  1,  1,  2,  3,  4,  5,  6,  6,  7,  8,  9, 10, 11, 11, 12, 12 /)
+      
+      tmpstr = "xxxxxxxx_xxxxxxxx"
+      print*,'tmpstr: ',tmpstr
+      do ii=1,16
+         write(tmpstr(5:8)  ,'(i2.2,i2.2)') fileMon(ii,1),fileDay(ii,1)
+         write(tmpstr(14:17),'(i2.2,i2.2)') fileMon(ii,2),fileDay(ii,2)
+         print*,'tmpstr: ',trim(tmpstr)
+         file_timestamp(ii) = trim(tmpstr)
+         print*,'file_timestamp(ii): ',trim(file_timestamp(ii))
+      end do      
+   
+      !  
+      ! Find the files for the current step  
+      ! 
+      fieldStep = 0
+      itime = 1
+      !print*,'currTime,fileTime,diff: ',currMon*100 + currDay,fileMon(itime,2)*100 + fileDay(itime,2),&
+      !& currMon*100 + currDay - (fileMon(itime,2)*100 + fileDay(itime,2))
+      do while (currMon*100 + currDay - (fileMon(itime,2)*100 + fileDay(itime,2)) > 0)
+         !print*,'currTime,fileTime,diff,itime: ',currMon*100 + currDay,fileMon(itime,2)*100 + fileDay(itime,2),&
+         !& currMon*100 + currDay - (fileMon(itime,2)*100 + fileDay(itime,2)),itime
+         itime = itime + 1
+      end do  
+   
+end if
+
+#ifdef initxyt
+   ! 
+   ! Allocate variables necessary for drifter simulation
+   !
+   alloCondGrid: if ( .not. allocated (ntimask) ) then
+      allocate ( ntimask(NTID,IJKMAX2,3) , trajinit(NTID,IJKMAX2,3) )
+   endif alloCondGrid
+#endif
    
    !
    ! Allocate variables 
@@ -82,39 +148,33 @@ SUBROUTINE readfields
    call updateClock 
  
 ! === Initialising fields ===
-   if (ints == intstart) then      
-      
-      ! INALT60 data with 4h frequency
-      allocate( file_timestamp(16), fileDay(16,2), fileMon(16,2) )
-      fileDay(1:16,1) = (/  1,  6, 31, 25, 22, 16, 11,  5, 30, 25, 19, 13,  8,  2, 27, 22 /)
-      fileDay(1:16,2) = (/  5, 30, 24, 21, 15, 10,  4, 29, 24, 18, 12,  7,  1, 26, 21, 31 /)
-      fileMon(1:16,1) = (/  1,  1,  1,  2,  3,  4,  5,  6,  6,  7,  8,  9, 10, 11, 11, 12 /)
-      fileMon(1:16,2) = (/  1,  1,  2,  3,  4,  5,  6,  6,  7,  8,  9, 10, 11, 11, 12, 12 /)
-      
-      tmpstr = "xxxxxxxx_xxxxxxxx"
-      !print*,'tmpstr: ',tmpstr
-      do ii=1,16
-         write(tmpstr(5:8 ),'(i2.2,i2.2)') fileMon(ii,1),fileDay(ii,1)
-         write(tmpstr(14:17),'(i2.2,i2.2)') fileMon(ii,2),fileDay(ii,2)
-         !print*,'tmpstr: ',trim(tmpstr)
-         file_timestamp(ii) = trim(tmpstr)
-         !print*,'file_timestamp(ii): ',trim(file_timestamp(ii))
-      end do      
+   initFieldcond: if(ints == intstart) then
    
-      !  
-      ! Find the files for the current step  
-      ! 
-      fieldStep = 0
-      itime = 1
-      !print*,'currTime,fileTime,diff: ',currMon*100 + currDay,fileMon(itime,2)*100 + fileDay(itime,2),&
-      !& currMon*100 + currDay - (fileMon(itime,2)*100 + fileDay(itime,2))
-      do while (currMon*100 + currDay - (fileMon(itime,2)*100 + fileDay(itime,2)) > 0)
-         !print*,'currTime,fileTime,diff,itime: ',currMon*100 + currDay,fileMon(itime,2)*100 + fileDay(itime,2),&
-         !& currMon*100 + currDay - (fileMon(itime,2)*100 + fileDay(itime,2)),itime
-         itime = itime + 1
-      end do            
-             
-   end if
+#ifdef initxyt
+      ! Time for individual start positions
+      if(IJKMAX2 == 7392) open(84,file=trim(inDataDir)//'topo/masktime_32_025', &
+                               form='unformatted')
+      read(84) trajinit
+      close(84)
+      j=0
+      do k=1,NTID
+         do i=1,IJKMAX2
+            if(trajinit(k,i,3) /= 0.) then
+               j=j+1
+#if orca025l75h6
+               trajinit(k,i,3)=float(kst2)-0.5
+               !   print *,j,trajinit(k,i,:)
+#endif
+            endif
+         enddo
+      enddo
+      ijkst=0
+      if(j /= IJKMAX2) then
+         stop 4396
+      endif
+#endif
+   
+   endif initFieldcond
    
    fieldStep = fieldStep + 1   
    print*,'fieldStep: ',fieldStep
@@ -133,23 +193,83 @@ SUBROUTINE readfields
    
    ncTpos = fieldStep
    
-   !print*,'itime:', itime
-   timestamp = trim(file_timestamp(itime))
-   !print*,'timestamp',timestamp
-   write(timestamp(1:4 ),'(i4)') currYear
-   write(timestamp(10:13),'(i4)') currYear
-   !print*,'timestamp:',timestamp
-   dataprefix='2_INALT60.L120-KRS0020_4h_'//trim(timestamp)
-   !print*,'dataprefix:',dataprefix
-   fieldFile = trim(inDataDir)//trim(dataprefix)
+   !
+   ! Find the files for the current step
+   !
    
-   print*,' Date: ',currYear, currMon, currDay
-   print*,' Time: ',currHour
-   print*,' File: ',fieldFile
-   print*,' Step: ',fieldStep
+   prefixForm = 'YYYY/RUNIDTSTSTSTS'
+   idGCM = '2_INALT60.L120-KRS0020_4h_'
+   tGridName = '_grid_T'
+   fileSuffix = '.nc'
+   dataprefix2(:) = ''
+   print*,prefixForm
+   print*,file_timestamp,itime
+   timestamp = trim(file_timestamp(itime))
+   print*,'timestamp',timestamp
+   
+   ichar = INDEX(prefixForm,'RUNID')
+   do while (ichar /= 0)
+      prefixForm = trim(prefixForm(:ichar-1))//trim(idGCM)//trim(prefixForm(ichar+5:))
+      print*,prefixForm
+      ichar = INDEX(prefixForm,'RUNID')
+   end do
+   
+   ichar = INDEX(prefixForm,'YYYY')
+   print*,prefixForm,ichar
+   do while (ichar /= 0)
+      write(prefixForm(ichar:ichar+3),'(i4)') currYear
+      ichar = INDEX(prefixForm,'YYYY')
+      print*,'year ',prefixForm,ichar
+   end do
+   
+   ichar = INDEX(timestamp,'YYYY')
+   print*,timestamp,ichar
+   do while (ichar /= 0)
+      write(timestamp(ichar:ichar+3),'(i4)') currYear
+      ichar = INDEX(timestamp,'YYYY')
+      print*,'year ',timestamp,ichar
+   end do
+   
+   ichar = INDEX(prefixForm,'MM')
+   print*,'mon ',prefixForm,ichar
+   do while (ichar /= 0)
+      write(prefixForm(ichar:ichar+1),'(i2.2)') currMon
+      ichar = INDEX(prefixForm,'MM')
+      print*,'mon ',prefixForm,ichar
+   end do
+      
+   ichar = INDEX(prefixForm,'DD')
+   do while (ichar /= 0)
+      write(prefixForm(ichar:ichar+1),'(i2.2)') currDay   
+      print*,'day ',prefixForm
+      ichar = INDEX(prefixForm,'DD')
+   end do 
+   
+   ichar = INDEX(prefixForm,'TSTSTSTS')
+   print*,prefixForm,ichar
+   do while (ichar /= 0)
+      prefixForm = trim(prefixForm(:ichar-1))//trim(timestamp)//trim(prefixForm(ichar+8:))
+      ichar = INDEX(prefixForm,'TSTSTSTS')
+      print*,prefixForm,ichar
+   end do
+   
+   ichar = INDEX(prefixForm,'GRID_X')
+   tFile = trim(inDataDir)//trim(prefixForm(:ichar))//trim(tGridName)//trim(prefixForm(ichar+5:))//trim(fileSuffix)
+   
+   print*,tFile
+   
+   fieldFile = trim(inDataDir)//trim(prefixForm)
+    
+   !dataprefix='xxxx/ORCA0083-N06_xxxxxxxx'
+   !write(dataprefix(1:4),'(i4)')   currYear
+   !write(dataprefix(19:26),'(i4,i2.2,i2.2)') currYear,currMon,currDay
+   !fieldFile = trim(inDataDir)//'means/'//trim(dataprefix)//'d05'
+   !medfieldFile = trim(inDataDir)//'medusa/'//trim(dataprefix)//'d05'
+   !fieldFile = trim(inDataDir)//'means/2000/ORCA0083-N01_20000105d05'
+   
    
    ! Read SSH
-   hs(:,     :, nsp) = get2DfieldNC(trim(fieldFile)//'_grid_T.nc', 'sossheig')
+   hs(:,     :, nsp) = get2DfieldNC(trim(fieldFile)//'T.nc', 'ssh')
    hs(imt+1, :, nsp) = hs(1,:,nsp)
    
    ! Depth at U, V, T points as 2D arrays
@@ -180,11 +300,11 @@ SUBROUTINE readfields
  
    ! Read temperature 
 #if defined tempsalt 
-   xxx(:,:,:) = get3DfieldNC(trim(fieldFile)//'_grid_T.nc', 'votemper')
+   xxx(:,:,:) = get3DfieldNC(trim(fieldFile)//'T.nc', 'potemp')
    tem(:,:,:,nsp) = xxx(:,:,km:1:-1)
    
    ! Read salinity
-   xxx(:,:,:) = get3DfieldNC(trim(fieldFile)//'_grid_T.nc', 'vosaline')
+   xxx(:,:,:) = get3DfieldNC(trim(fieldFile)//'T.nc', 'salin')
    sal(:,:,:,nsp) = xxx(:,:,km:1:-1)
    
    ! Calculate potential density
@@ -201,9 +321,15 @@ SUBROUTINE readfields
 #endif     
    
    ! Read u, v
-   uvel = get3DfieldNC(trim(fieldFile)//'_grid_U.nc', 'vozocrtx')
-   vvel = get3DfieldNC(trim(fieldFile)//'_grid_V.nc', 'vomecrty')
+   uvel = get3DfieldNC(trim(fieldFile)//'U.nc', 'uo')
+   vvel = get3DfieldNC(trim(fieldFile)//'V.nc', 'vo')
    
+   ! Put oxygen in salinity field
+   xxx(:,:,:) = get3DfieldNC(trim(medfieldFile)//'D.nc', 'TPP3')
+   sal(:,:,:,nsp) = xxx(:,:,km:1:-1)
+   
+   xxx(:,:,:) = get3DfieldNC(trim(medfieldFile)//'P.nc', 'DIN')
+   rho(:,:,:,nsp) = xxx(:,:,km:1:-1)
    !
    ! Calculate zonal and meridional volume flux
    !

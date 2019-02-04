@@ -41,24 +41,41 @@ SUBROUTINE setupgrid
    
    map2D    = [3, 4,  1, 1 ]
    map3D    = [2, 3,  4, 1 ]
-   ncTpos   = 1   
+   ncTpos   = 1
    
+   !
+   ! --- Where are coordinates stored, and horizontal grid, and vertical grid 
+   !
+   coordFile = trim(topoDataDir)//'/2_INALT60.L120-KRS0020_mesh_mask.*'
+   hgridFile = trim(topoDataDir)//'/2_INALT60.L120-KRS0020_mesh_mask.*'
+   zgridFile = trim(topoDataDir)//'/2_INALT60.L120-KRS0020_mesh_mask.*'
+   bathyFile = trim(topoDataDir)//'/2_INALT60.L120-KRS0020_mesh_mask.*'
+   dx_name = 'e1t'
+   dy_name = 'e2t'
+   dxv_name = 'e1v'
+   dyu_name = 'e2u'
+   dz_1D_name = 'e3t_1d'
+   dzt_3D_name = 'e3t_0'
+   dzu_3D_name = 'e3u_0'
+   dzv_3D_name = 'e3v_0'
+   kBathy_name = 'mbathy'
+   gridIsUpsideDown = .true.
+   read3Ddz = .true. 
       
    !
    ! --- Read dx, dy at T points --- 
    !
    allocate ( e1t(imt,jmt) , e2t(imt,jmt) )
-   gridFile = trim(topoDataDir)//'2_INALT60.L120-KRS0020_mesh_mask.*'
-   e1t  = get2DfieldNC(gridFile, 'e1t')
-   e2t  = get2DfieldNC(gridFile, 'e2t')
+   e1t  = get2DfieldNC(hgridFile, dx_name)
+   e2t  = get2DfieldNC(hgridFile, dy_name)
    dxdy(1:imt,1:jmt) = e1t(1:imt,1:jmt) * e2t(1:imt,1:jmt)
    deallocate ( e1t, e2t )
   
    !
    ! --- Read dy at U points and dx at V points --- 
    !
-   dyu  = get2DfieldNC(gridFile, 'e2u')
-   dxv  = get2DfieldNC(gridFile, 'e1v')
+   dyu  = get2DfieldNC(hgridFile, dyu_name)
+   dxv  = get2DfieldNC(hgridFile, dxv_name)
    dx   = dxv(imt/2, jmt/2)
    dy   = dyu(imt/2, jmt/2)
    
@@ -66,19 +83,25 @@ SUBROUTINE setupgrid
    ! Read dz at T points without considering 
    ! bottom partial cells and variable volume  
    !
-   gridFile = trim(topoDataDir)//'2_INALT60.L120-KRS0020_mesh_mask.*'
-   dz = get1DfieldNC(gridFile, 'e3t_1d')
-   do k=1,km
-      kk=km+1-k
-      dz(kk)=zlev(k)
-      zlev(k)=zlev(k)+zlev(k-1)
-   end do
+   dz = get1DfieldNC(zgridFile, dz_1D_name)
+   if (gridIsUpsideDown) then
+      do k=1,km
+         kk=km+1-k
+         dz(kk)=zlev(k)
+         zlev(k)=zlev(k)+zlev(k-1)
+      end do
+   else
+      do k=1,km
+         dz(k)=zlev(k)
+         zlev(k)=zlev(k)+zlev(k-1)
+      end do
+   end if
    
    !
    ! Read number of valid levels at U, V, T points
    ! as 2D array
    !
-   kmt = get2DfieldNC(gridFile, 'mbathy')
+   kmt = get2DfieldNC(bathyFile, kBathy_name)
    allocate ( kmu(imt,jmt), kmv(imt,jmt) )
    
    kmu=0 ; kmv=0
@@ -92,12 +115,13 @@ SUBROUTINE setupgrid
          kmv(i,j)=min(kmt(i,j), kmt(i,jp),KM)
       enddo
    enddo
-
+   
+   ! Land-sea mask at north fold 
    do i=4, imt
       ii = imt + 4 - i
       kmv(i,jmt) = kmv(ii,jmt-3)
    enddo
-  
+   
    !
    ! Read layer thickness at U, V, T points 
    ! without considering variable volume.
@@ -106,10 +130,33 @@ SUBROUTINE setupgrid
    !
    allocate ( dzu(imt,jmt,km,2),dzv(imt,jmt,km,2), dzt0(imt,jmt,km) )
    
-   dzt0(:,:,:) = get3DfieldNC(gridFile, 'e3t_0')
-   dzu(:,:,:,1) = get3DfieldNC(gridFile, 'e3u_0')
-   dzv(:,:,:,1) = get3DfieldNC(gridFile, 'e3v_0')
-   
+   if (read3Ddz) then
+      
+      print*,'  Reading 3D dz for u,v,t points ' 
+      if (gridIsUpsideDown) then
+         dzt0(:,:,km:1:-1)  = get3DfieldNC(zgridFile, dzt_3D_name)
+         dzu(:,:,km:1:-1,1) = get3DfieldNC(zgridFile, dzu_3D_name)
+         dzv(:,:,km:1:-1,1) = get3DfieldNC(zgridFile, dzv_3D_name)
+      else
+         dzt0(:,:,km:1:-1)  = get3DfieldNC(zgridFile, dzt_3D_name)
+         dzu(:,:,km:1:-1,1) = get3DfieldNC(zgridFile, dzu_3D_name)
+         dzv(:,:,km:1:-1,1) = get3DfieldNC(zgridFile, dzv_3D_name)
+      end if
+      
+   else
+      
+      print*,'  Set dz horizontally constant for u,v,t points ' 
+      print*,'  i.e. no partial steps '
+      do j=1,jmt
+         do i=1,imt
+            dzt0(i,j,1:km) = dz(1:km)
+            dzu(i,j,1:km,1)   = dz(1:km)
+            dzv(i,j,1:km,1)   = dz(1:km)
+         end do
+      end do
+      
+   end if
+      
    !
    ! Ensure thickness is zero in invalid points
    !
@@ -126,25 +173,6 @@ SUBROUTINE setupgrid
          end where
       enddo 
    end do
-   
-   ! Reverse grid 
-   allocate( tmp4D(imt,jmt,km,2) )
-   
-   tmp4D(1:imt,1:jmt,1:km,1) = dzt0(1:imt,1:jmt,1:km)
-   do k=1,km
-      dzt0(:,:,k) = tmp4D(:,:,km+1-k,1) 
-   end do
-   
-   tmp4D(1:imt,1:jmt,1:km,:) = dzu(1:imt,1:jmt,1:km,:)
-   do k=1,km
-      dzu(:,:,k,:) = tmp4D(:,:,km+1-k,:) 
-   end do
-   
-   tmp4D(1:imt,1:jmt,1:km,:) = dzv(1:imt,1:jmt,1:km,:)
-   do k=1,km
-      dzv(:,:,k,:) = tmp4D(:,:,km+1-k,:) 
-   end do
-   
-   deallocate( tmp4d )
+      
    
 end SUBROUTINE setupgrid

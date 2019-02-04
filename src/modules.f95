@@ -119,7 +119,13 @@ MODULE mod_grid
   REAL(DP)                                  :: dxyz
   INTEGER, ALLOCATABLE, DIMENSION(:,:)      :: mask
   REAL(DP), ALLOCATABLE, DIMENSION(:)       :: csu,cst,dyt,phi
-
+  
+  CHARACTER(LEN=200)                        :: coordFile, hgridFile, zgridFile, bathyFile
+  CHARACTER(LEN=50)                         :: dx_name, dy_name, dxv_name, dyu_name, &
+                                               dz_1D_name, dzt_3D_name, dzu_3D_name, dzv_3D_name, &
+                                               kBathy_name
+  LOGICAL                                   :: gridIsUpsideDown, read3Ddz
+  
   ! === Vertical grids ===
   REAL(DP), ALLOCATABLE, DIMENSION(:)       :: zlev
   REAL(DP), ALLOCATABLE, DIMENSION(:,:,:,:) :: z_r, z_w

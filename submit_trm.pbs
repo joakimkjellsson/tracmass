@@ -1,0 +1,18 @@
+#!/bin/bash
+#PBS -b 1
+#PBS -l cpunum_job=1
+#PBS -l elapstim_req=12:00:00
+#PBS -l cputim_job=24:00:00
+#PBS -l memsz_job=60gb
+#PBS -N inalt60_trm
+#PBS -o inalt60_trm.out
+#PBS -j o
+#PBS -q cllong
+
+# Change into qsub directory
+cd $PBS_O_WORKDIR
+# Start the serial computation
+./runtrm
+# Output of used resources (computation time, main memory) after the job
+/usr/bin/nqsII/qstat -f ${PBS_JOBID/0:/}
+
