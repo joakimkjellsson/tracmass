@@ -46,36 +46,36 @@ SUBROUTINE setupgrid
    !
    ! --- Where are coordinates stored, and horizontal grid, and vertical grid 
    !
-   coordFile = trim(topoDataDir)//'/2_INALT60.L120-KRS0020_mesh_mask.*'
-   hgridFile = trim(topoDataDir)//'/2_INALT60.L120-KRS0020_mesh_mask.*'
-   zgridFile = trim(topoDataDir)//'/2_INALT60.L120-KRS0020_mesh_mask.*'
-   bathyFile = trim(topoDataDir)//'/2_INALT60.L120-KRS0020_mesh_mask.*'
-   dx_name = 'e1t'
-   dy_name = 'e2t'
-   dxv_name = 'e1v'
-   dyu_name = 'e2u'
-   dz_1D_name = 'e3t_1d'
-   dzt_3D_name = 'e3t_0'
-   dzu_3D_name = 'e3u_0'
-   dzv_3D_name = 'e3v_0'
-   kBathy_name = 'mbathy'
-   gridIsUpsideDown = .true.
-   read3Ddz = .true. 
+   !coordFile = trim(topoDataDir)//'/2_INALT60.L120-KRS0020_mesh_mask.*'
+   !hgridFile = trim(topoDataDir)//'/2_INALT60.L120-KRS0020_mesh_mask.*'
+   !zgridFile = trim(topoDataDir)//'/2_INALT60.L120-KRS0020_mesh_mask.*'
+   !bathyFile = trim(topoDataDir)//'/2_INALT60.L120-KRS0020_mesh_mask.*'
+   !dx_name = 'e1t'
+   !dy_name = 'e2t'
+   !dxv_name = 'e1v'
+   !dyu_name = 'e2u'
+   !dz_1D_name = 'e3t_1d'
+   !dzt_3D_name = 'e3t_0'
+   !dzu_3D_name = 'e3u_0'
+   !dzv_3D_name = 'e3v_0'
+   !kBathy_name = 'mbathy'
+   !gridIsUpsideDown = .true.
+   !read3Ddz = .true. 
       
    !
    ! --- Read dx, dy at T points --- 
    !
    allocate ( e1t(imt,jmt) , e2t(imt,jmt) )
-   e1t  = get2DfieldNC(hgridFile, dx_name)
-   e2t  = get2DfieldNC(hgridFile, dy_name)
+   e1t  = get2DfieldNC(trim(topoDataDir)//trim(hgridFile), dx_name)
+   e2t  = get2DfieldNC(trim(topoDataDir)//trim(hgridFile), dy_name)
    dxdy(1:imt,1:jmt) = e1t(1:imt,1:jmt) * e2t(1:imt,1:jmt)
    deallocate ( e1t, e2t )
   
    !
    ! --- Read dy at U points and dx at V points --- 
    !
-   dyu  = get2DfieldNC(hgridFile, dyu_name)
-   dxv  = get2DfieldNC(hgridFile, dxv_name)
+   dyu  = get2DfieldNC(trim(topoDataDir)//trim(hgridFile), dyu_name)
+   dxv  = get2DfieldNC(trim(topoDataDir)//trim(hgridFile), dxv_name)
    dx   = dxv(imt/2, jmt/2)
    dy   = dyu(imt/2, jmt/2)
    
@@ -83,7 +83,7 @@ SUBROUTINE setupgrid
    ! Read dz at T points without considering 
    ! bottom partial cells and variable volume  
    !
-   dz = get1DfieldNC(zgridFile, dz_1D_name)
+   dz = get1DfieldNC(trim(topoDataDir)//trim(zgridFile), dz_1D_name)
    if (gridIsUpsideDown) then
       do k=1,km
          kk=km+1-k
@@ -101,7 +101,7 @@ SUBROUTINE setupgrid
    ! Read number of valid levels at U, V, T points
    ! as 2D array
    !
-   kmt = get2DfieldNC(bathyFile, kBathy_name)
+   kmt = get2DfieldNC(trim(topoDataDir)//trim(bathyFile), kBathy_name)
    allocate ( kmu(imt,jmt), kmv(imt,jmt) )
    
    kmu=0 ; kmv=0
@@ -134,13 +134,13 @@ SUBROUTINE setupgrid
       
       print*,'  Reading 3D dz for u,v,t points ' 
       if (gridIsUpsideDown) then
-         dzt0(:,:,km:1:-1)  = get3DfieldNC(zgridFile, dzt_3D_name)
-         dzu(:,:,km:1:-1,1) = get3DfieldNC(zgridFile, dzu_3D_name)
-         dzv(:,:,km:1:-1,1) = get3DfieldNC(zgridFile, dzv_3D_name)
+         dzt0(:,:,km:1:-1)  = get3DfieldNC(trim(topoDataDir)//trim(zgridFile), dzt_3D_name)
+         dzu(:,:,km:1:-1,1) = get3DfieldNC(trim(topoDataDir)//trim(zgridFile), dzu_3D_name)
+         dzv(:,:,km:1:-1,1) = get3DfieldNC(trim(topoDataDir)//trim(zgridFile), dzv_3D_name)
       else
-         dzt0(:,:,km:1:-1)  = get3DfieldNC(zgridFile, dzt_3D_name)
-         dzu(:,:,km:1:-1,1) = get3DfieldNC(zgridFile, dzu_3D_name)
-         dzv(:,:,km:1:-1,1) = get3DfieldNC(zgridFile, dzv_3D_name)
+         dzt0(:,:,km:1:-1)  = get3DfieldNC(trim(topoDataDir)//trim(zgridFile), dzt_3D_name)
+         dzu(:,:,km:1:-1,1) = get3DfieldNC(trim(topoDataDir)//trim(zgridFile), dzu_3D_name)
+         dzv(:,:,km:1:-1,1) = get3DfieldNC(trim(topoDataDir)//trim(zgridFile), dzv_3D_name)
       end if
       
    else

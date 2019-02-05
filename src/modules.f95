@@ -126,6 +126,14 @@ MODULE mod_grid
                                                kBathy_name
   LOGICAL                                   :: gridIsUpsideDown, read3Ddz
   
+  ! Info about input data 
+  CHARACTER(LEN=50)                         :: RunID, tGridName, uGridName, vGridName, &
+                                               fileSuffix, ssh_name, ueul_name, veul_name, &
+                                               usgs_name, vsgs_name, temp_name, salt_name
+  CHARACTER(LEN=200)                        :: physDataDir, physPrefixForm,  &
+                                               bioDataDir, bioPrefixForm 
+  CHARACTER(LEN=50), DIMENSION(20)          :: physTracerNames, bioTracerNames
+  
   ! === Vertical grids ===
   REAL(DP), ALLOCATABLE, DIMENSION(:)       :: zlev
   REAL(DP), ALLOCATABLE, DIMENSION(:,:,:,:) :: z_r, z_w

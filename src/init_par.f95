@@ -38,7 +38,15 @@ SUBROUTINE init_params
 ! Setup namelists
    namelist /INIT_NAMELIST_VERSION/ gridVerNum
    namelist /INIT_GRID_DESCRIPTION/ GCMname, GCMsource, gridName, gridSource,&
-                                    griddesc, inDataDir, topoDataDir !!joakim
+                                    griddesc, inDataDir, topoDataDir, RunID, & 
+                                    physDataDir, physPrefixForm,             &
+                                    bioDataDir, bioPrefixForm,               &
+                                    tGridName, uGridName, vGridName,         &
+                                    fileSuffix,                              & 
+                                    ssh_name, ueul_name, veul_name,          &
+                                    usgs_name, vsgs_name,                    &
+                                    temp_name, salt_name,                    &
+                                    physTracerNames, bioTracerNames
    namelist /INIT_CASE_DESCRIPTION/ caseName, caseDesc
    namelist /INIT_GRID_SIZE/        imt, jmt, km, nst, subGrid, subGridImin, &
                                     subGridImax, subGridJmin, subGridJmax,   &

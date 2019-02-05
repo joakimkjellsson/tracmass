@@ -9,6 +9,20 @@
         griddesc = '1/60 deg run for the Agulhas.',
        indatadir = '/sfs/fs1/work-geomar/smomw355/hlrn_hannover_sync/smomw244/shkrschu/gfs2/work/shkrschu/SDIR/INALT60.L120/INALT60.L120-KRS0020-S/',
      topoDataDir = '/sfs/fs1/work-geomar/smomw355/hlrn_hannover_sync/smomw244/shkrschu/gfs2/work/shkrschu/SDIR/INALT60.L120/INALT60.L120-KRS0020-S/',
+     RunID       = '2_INALT60.L120-KRS0020_4h', 
+     physDataDir = '/sfs/fs1/work-geomar/smomw355/hlrn_hannover_sync/smomw244/shkrschu/gfs2/work/shkrschu/SDIR/INALT60.L120/INALT60.L120-KRS0020-S/',
+     physPrefixForm = 'RUNID_TSTSTSTS_GRIDX'
+     bioDataDir = '', 
+     bioPrefixForm = '', 
+     tGridName = 'grid_T', 
+     uGridName = 'grid_U',
+     vGridName = 'grid_V',
+     fileSuffix = '.nc',
+     ssh_name = 'sossheig', 
+     ueul_name = 'vozocrtx', 
+     veul_name = 'vomecrty',
+     temp_name = 'votemper',
+     salt_name = 'vosaline',
 /
 &INIT_CASE_DESCRIPTION
         casename = 'INALT60',
@@ -27,6 +41,21 @@
      subgridfile = 'templ.asc',
        subgridid =      0,
        nperio    =      0, 
+       coordFile = '2_INALT60.L120-KRS0020_mesh_mask.*'
+     hgridFile = '2_INALT60.L120-KRS0020_mesh_mask.*'
+     zgridFile = '2_INALT60.L120-KRS0020_mesh_mask.*'
+     bathyFile = '2_INALT60.L120-KRS0020_mesh_mask.*'
+   dx_name = 'e1t'
+   dy_name = 'e2t'
+   dxv_name = 'e1v'
+   dyu_name = 'e2u'
+   dz_1D_name = 'e3t_1d'
+   dzt_3D_name = 'e3t_0'
+   dzu_3D_name = 'e3u_0'
+   dzv_3D_name = 'e3v_0'
+   kBathy_name = 'mbathy'
+   gridIsUpsideDown = .true.
+   read3Ddz = .true. 
 /
 &INIT_BASE_TIME
          basesec =      0,

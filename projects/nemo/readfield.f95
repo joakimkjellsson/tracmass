@@ -15,11 +15,11 @@ SUBROUTINE readfields
    USE mod_deformation
    USE mod_laplacian
    
-#ifdef tempsalt
    USE mod_dens
    USE mod_stat
-#endif
+   
    IMPLICIT none
+   
    ! ==========================================================================
    ! === Read velocity, temperature and salinity for ORCA0083 configuration ===
    ! ==========================================================================
@@ -44,12 +44,11 @@ SUBROUTINE readfields
    INTEGER                                       :: ichar, itime, fieldStep
    INTEGER, SAVE                                 :: ntempus=0,ntempusb=0,nread
    ! = Variables used for getfield procedures
-   CHARACTER (len=200)                           :: fieldFile, medfieldFile, fileSuffix
-   CHARACTER (len=200)                           :: prefixForm, tFile, uFile, vFile
-   CHARACTER (len=100)                           :: tGridName, uGridName, vGridName, idGCM, tmpstr
+   CHARACTER (len=200)                           :: fieldFile, medfieldFile, umFile, vmFile
+   CHARACTER (len=200)                           :: tFile, uFile, vFile
+   CHARACTER (len=100)                           :: tmpstr
    ! = Variables for filename generation
    CHARACTER (len=200)                           :: dataprefix, timestamp
-   CHARACTER (len=50), DIMENSION(30)             :: dataprefix2
    REAL(DP), ALLOCATABLE, DIMENSION(:,:)         :: zstot,zstou,zstov,abyst,abysu,abysv
    REAL(DP), ALLOCATABLE, DIMENSION(:,:,:)       :: xxx
    REAL*4                                      :: dd,hu,hv,uint,vint,zint,hh,h0
@@ -58,35 +57,34 @@ SUBROUTINE readfields
    INTEGER, ALLOCATABLE, DIMENSION(:,:),SAVE          :: fileMon, fileDay
    CHARACTER (len=200), ALLOCATABLE, DIMENSION(:),SAVE :: file_timestamp
    
-#ifdef initxyt
    INTEGER, PARAMETER                            :: NTID=73
    INTEGER, PARAMETER                            :: IJKMAX2=7392 ! for distmax=0.25 and 32 days
 
    INTEGER,  SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: ntimask
    REAL*4, SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: trajinit
-#endif
    
-#ifdef tempsalt
    REAL*4, ALLOCATABLE, DIMENSION(:)           :: rhozvec, depthzvec, latvec
    REAL*4, ALLOCATABLE, DIMENSION(:)           :: tmpzvec, salzvec
-#endif
 
-   LOGICAL                                       :: around
+   LOGICAL                                       :: around, readMean = .false., readTS = .true., &
+                                                    vvl = .true., readBio = .false., readSSH = .true.
  
 !---------------------------------------------------------------
 
 if (ints == intstart) then
-#ifdef nomean
-   !! Read mean  
-   if(.not. allocated (u_m)) then
-   allocate ( u_m(imt,jmt,km), v_m(imt,jmt,km) )
-   print*,' Read mean fields '
-   u_m(1:imt,1:jmt,1:km) = get3DfieldNC('/group_workspaces/jasmin2/aopp/joakim/ORCA0083-N001/mean/ORCA0083-N01_1978-2010m00U.nc',&
-                            & 'vozocrtx')
-   v_m(1:imt,1:jmt,1:km) = get3DfieldNC('/group_workspaces/jasmin2/aopp/joakim/ORCA0083-N001/mean/ORCA0083-N01_1978-2010m00V.nc',&
-                            & 'vomecrty')
+   
+   if (readMean) then
+      !! Read mean  
+      if(.not. allocated (u_m)) then
+         allocate ( u_m(imt,jmt,km), v_m(imt,jmt,km) )
+         print*,' Read mean fields '
+         
+         umFile = '/group_workspaces/jasmin2/aopp/joakim/ORCA0083-N001/mean/ORCA0083-N01_1978-2010m00U.nc'
+         vmFile = '/group_workspaces/jasmin2/aopp/joakim/ORCA0083-N001/mean/ORCA0083-N01_1978-2010m00V.nc'
+         u_m(1:imt,1:jmt,1:km) = get3DfieldNC(umFile,'vozocrtx')
+         v_m(1:imt,1:jmt,1:km) = get3DfieldNC(vmFile,'vomecrty')
+      end if
    end if
-#endif
    
       ! INALT60 data with 4h frequency
       allocate( file_timestamp(16), fileDay(16,2), fileMon(16,2) )
@@ -95,7 +93,7 @@ if (ints == intstart) then
       fileMon(1:16,1) = (/  1,  1,  1,  2,  3,  4,  5,  6,  6,  7,  8,  9, 10, 11, 11, 12 /)
       fileMon(1:16,2) = (/  1,  1,  2,  3,  4,  5,  6,  6,  7,  8,  9, 10, 11, 11, 12, 12 /)
       
-      tmpstr = "xxxxxxxx_xxxxxxxx"
+      tmpstr = "YYYYMMDD_YYYYMMDD"
       print*,'tmpstr: ',tmpstr
       do ii=1,16
          write(tmpstr(5:8)  ,'(i2.2,i2.2)') fileMon(ii,1),fileDay(ii,1)
@@ -135,9 +133,9 @@ end if
    alloCondUVW: if(.not. allocated (zstot)) then
       allocate ( zstot(imt,jmt),zstou(imt,jmt),zstov(imt,jmt) )
       allocate ( xxx(imt,jmt,km))
-#ifdef tempsalt
-      allocate ( tmpzvec(km), salzvec(km), rhozvec(km), depthzvec(km), latvec(km))
-#endif
+      if (readTS) then
+         allocate ( tmpzvec(km), salzvec(km), rhozvec(km), depthzvec(km), latvec(km))
+      end if
    endif alloCondUVW
  
    call datasetswap ! Swap between current and previous step
@@ -197,29 +195,37 @@ end if
    ! Find the files for the current step
    !
    
-   prefixForm = 'YYYY/RUNIDTSTSTSTS'
-   idGCM = '2_INALT60.L120-KRS0020_4h_'
-   tGridName = '_grid_T'
-   fileSuffix = '.nc'
-   dataprefix2(:) = ''
-   print*,prefixForm
+   !physPrefixForm = 'RUNID_TSTSTSTS_GRIDX'
+   !RunID = '2_INALT60.L120-KRS0020_4h'
+   !tGridName = 'grid_T'
+   !fileSuffix = '.nc'
+   
+   !ssh_name = 'sossheig'
+   !ueul_name = 'vozocrtx'
+   !veul_name = 'vomecrty'
+   
+   !physTracerNames(1) = 'votemper'
+   !physTracerNames(2) = 'vosaline'
+   
+   
+   print*,physPrefixForm
    print*,file_timestamp,itime
    timestamp = trim(file_timestamp(itime))
    print*,'timestamp',timestamp
    
-   ichar = INDEX(prefixForm,'RUNID')
+   ichar = INDEX(physPrefixForm,'RUNID')
    do while (ichar /= 0)
-      prefixForm = trim(prefixForm(:ichar-1))//trim(idGCM)//trim(prefixForm(ichar+5:))
-      print*,prefixForm
-      ichar = INDEX(prefixForm,'RUNID')
+      physPrefixForm = trim(physPrefixForm(:ichar-1))//trim(RunID)//trim(physPrefixForm(ichar+5:))
+      print*,physPrefixForm
+      ichar = INDEX(physPrefixForm,'RUNID')
    end do
    
-   ichar = INDEX(prefixForm,'YYYY')
-   print*,prefixForm,ichar
+   ichar = INDEX(physPrefixForm,'YYYY')
+   print*,physPrefixForm,ichar
    do while (ichar /= 0)
-      write(prefixForm(ichar:ichar+3),'(i4)') currYear
-      ichar = INDEX(prefixForm,'YYYY')
-      print*,'year ',prefixForm,ichar
+      write(physPrefixForm(ichar:ichar+3),'(i4)') currYear
+      ichar = INDEX(physPrefixForm,'YYYY')
+      print*,'year ',physPrefixForm,ichar
    end do
    
    ichar = INDEX(timestamp,'YYYY')
@@ -230,35 +236,30 @@ end if
       print*,'year ',timestamp,ichar
    end do
    
-   ichar = INDEX(prefixForm,'MM')
-   print*,'mon ',prefixForm,ichar
+   ichar = INDEX(physPrefixForm,'MM')
    do while (ichar /= 0)
-      write(prefixForm(ichar:ichar+1),'(i2.2)') currMon
-      ichar = INDEX(prefixForm,'MM')
-      print*,'mon ',prefixForm,ichar
+      write(physPrefixForm(ichar:ichar+1),'(i2.2)') currMon
+      ichar = INDEX(physPrefixForm,'MM')
    end do
       
-   ichar = INDEX(prefixForm,'DD')
+   ichar = INDEX(physPrefixForm,'DD')
    do while (ichar /= 0)
-      write(prefixForm(ichar:ichar+1),'(i2.2)') currDay   
-      print*,'day ',prefixForm
-      ichar = INDEX(prefixForm,'DD')
+      write(physPrefixForm(ichar:ichar+1),'(i2.2)') currDay   
+      ichar = INDEX(physPrefixForm,'DD')
    end do 
    
-   ichar = INDEX(prefixForm,'TSTSTSTS')
-   print*,prefixForm,ichar
+   ichar = INDEX(physPrefixForm,'TSTSTSTS')
    do while (ichar /= 0)
-      prefixForm = trim(prefixForm(:ichar-1))//trim(timestamp)//trim(prefixForm(ichar+8:))
-      ichar = INDEX(prefixForm,'TSTSTSTS')
-      print*,prefixForm,ichar
+      physPrefixForm = trim(physPrefixForm(:ichar-1))//trim(timestamp)//trim(physPrefixForm(ichar+8:))
+      ichar = INDEX(physPrefixForm,'TSTSTSTS')
    end do
    
-   ichar = INDEX(prefixForm,'GRID_X')
-   tFile = trim(inDataDir)//trim(prefixForm(:ichar))//trim(tGridName)//trim(prefixForm(ichar+5:))//trim(fileSuffix)
+   ichar = INDEX(physPrefixForm,'GRIDX')
+   tFile = trim(inDataDir)//trim(physPrefixForm(:ichar-1))//trim(tGridName)//trim(physPrefixForm(ichar+5:))//trim(fileSuffix)
+   uFile = trim(inDataDir)//trim(physPrefixForm(:ichar-1))//trim(tGridName)//trim(physPrefixForm(ichar+5:))//trim(fileSuffix)
+   vFile = trim(inDataDir)//trim(physPrefixForm(:ichar-1))//trim(tGridName)//trim(physPrefixForm(ichar+5:))//trim(fileSuffix)
    
    print*,tFile
-   
-   fieldFile = trim(inDataDir)//trim(prefixForm)
     
    !dataprefix='xxxx/ORCA0083-N06_xxxxxxxx'
    !write(dataprefix(1:4),'(i4)')   currYear
@@ -269,8 +270,10 @@ end if
    
    
    ! Read SSH
-   hs(:,     :, nsp) = get2DfieldNC(trim(fieldFile)//'T.nc', 'ssh')
-   hs(imt+1, :, nsp) = hs(1,:,nsp)
+   if (readSSH .or. vvl) then
+      hs(:,     :, nsp) = get2DfieldNC(trim(tFile), ssh_name)
+      hs(imt+1, :, nsp) = hs(1,:,nsp)
+   end if
    
    ! Depth at U, V, T points as 2D arrays
    allocate ( abyst(imt, jmt) , abysu(imt, jmt) , abysv(imt, jmt) )
@@ -279,57 +282,65 @@ end if
    abysu = sum(dzu(:,:,:,1), dim=3)
    abysv = sum(dzv(:,:,:,1), dim=3)
    
-   ! Calculate SSH/depth
-   where (abyst /= 0)
-      zstot = hs(:imt,:jmt,nsp)/abyst + 1
-   elsewhere
-      zstot = 0.d0
-   end where
+   if (vvl) then
+      ! Calculate SSH/depth
+      where (abyst /= 0)
+         zstot = hs(:imt,:jmt,nsp)/abyst + 1
+      elsewhere
+         zstot = 0.d0
+      end where
+      
+      where (abysu /= 0)
+         zstou = 0.5*(hs(:imt,:jmt,nsp)+hs(2:imt+1,:jmt,nsp))/abysu + 1
+      elsewhere
+         zstou = 0.d0
+      end where
    
-   where (abysu /= 0)
-      zstou = 0.5*(hs(:imt,:jmt,nsp)+hs(2:imt+1,:jmt,nsp))/abysu + 1
-   elsewhere
-      zstou = 0.d0
-   end where
+      where (abysv /= 0)
+         zstov = 0.5*(hs(:imt,:jmt,nsp)+hs(:imt,2:jmt+1,nsp))/abysv + 1
+      elsewhere
+         zstov = 0.d0
+      end where
+   end if
    
-   where (abysv /= 0)
-      zstov = 0.5*(hs(:imt,:jmt,nsp)+hs(:imt,2:jmt+1,nsp))/abysv + 1
-   elsewhere
-      zstov = 0.d0
-   end where
- 
    ! Read temperature 
-#if defined tempsalt 
-   xxx(:,:,:) = get3DfieldNC(trim(fieldFile)//'T.nc', 'potemp')
-   tem(:,:,:,nsp) = xxx(:,:,km:1:-1)
+   if (readTS) then
+      xxx(:,:,:) = get3DfieldNC(trim(tFile), temp_name)
+      tem(:,:,:,nsp) = xxx(:,:,km:1:-1)
+      
+      ! Read salinity
+      xxx(:,:,:) = get3DfieldNC(trim(tFile), salt_name)
+      sal(:,:,:,nsp) = xxx(:,:,km:1:-1)
    
-   ! Read salinity
-   xxx(:,:,:) = get3DfieldNC(trim(fieldFile)//'T.nc', 'salin')
-   sal(:,:,:,nsp) = xxx(:,:,km:1:-1)
-   
-   ! Calculate potential density
-   depthzvec = 0.
-   do j=1,jmt
-      latvec=-80+1./12.*float(j+subGridJmin-1)
-      do i=1,IMT
-         tmpzvec = tem(i,j,:,nsp)
-         salzvec = sal(i,j,:,nsp)
-         call statvd(tmpzvec, salzvec, rhozvec ,km ,depthzvec ,latvec)
-         rho(i,j,:,nsp)=rhozvec - 1000.
+      ! Calculate potential density
+      depthzvec = 0.
+      do j=1,jmt
+         latvec=-80+1./12.*float(j+subGridJmin-1)
+         do i=1,IMT
+            tmpzvec = tem(i,j,:,nsp)
+            salzvec = sal(i,j,:,nsp)
+            call statvd(tmpzvec, salzvec, rhozvec ,km ,depthzvec ,latvec)
+            rho(i,j,:,nsp)=rhozvec - 1000.
+         end do
       end do
-   end do
-#endif     
+   end if     
    
+   !
    ! Read u, v
-   uvel = get3DfieldNC(trim(fieldFile)//'U.nc', 'uo')
-   vvel = get3DfieldNC(trim(fieldFile)//'V.nc', 'vo')
+   !
+   uvel = get3DfieldNC(trim(uFile), trim(ueul_name))
+   vvel = get3DfieldNC(trim(vFile), trim(veul_name))
    
-   ! Put oxygen in salinity field
-   xxx(:,:,:) = get3DfieldNC(trim(medfieldFile)//'D.nc', 'TPP3')
-   sal(:,:,:,nsp) = xxx(:,:,km:1:-1)
+   if (readBio) then
+      ! Put oxygen in salinity field
+      xxx(:,:,:) = get3DfieldNC(trim(medfieldFile)//'D.nc', 'TPP3')
+      sal(:,:,:,nsp) = xxx(:,:,km:1:-1)
+      
+      xxx(:,:,:) = get3DfieldNC(trim(medfieldFile)//'P.nc', 'DIN')
+      rho(:,:,:,nsp) = xxx(:,:,km:1:-1)
+   end if 
    
-   xxx(:,:,:) = get3DfieldNC(trim(medfieldFile)//'P.nc', 'DIN')
-   rho(:,:,:,nsp) = xxx(:,:,km:1:-1)
+   
    !
    ! Calculate zonal and meridional volume flux
    !
@@ -338,14 +349,16 @@ end if
    ! but is accurate within 1% 
    !
    
-   do k = 1, km
-   do j = 1, jmt
-   do i = 1, imt
-      dzt(i,j,k,nsp) = dzt0(i,j,k) * zstot(i,j)
-   end do
-   end do
-   end do
-
+   if (vvl) then
+      do k = 1, km
+      do j = 1, jmt
+      do i = 1, imt
+         dzt(i,j,k,nsp) = dzt0(i,j,k) * zstot(i,j)
+      end do
+      end do
+      end do
+   end if
+   
 #ifdef nomean   
    !! flip u,v upside down
    !! use uflux, vflux as temporary arrays
