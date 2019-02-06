@@ -46,7 +46,9 @@ SUBROUTINE init_params
                                     ssh_name, ueul_name, veul_name,          &
                                     usgs_name, vsgs_name,                    &
                                     temp_name, salt_name,                    &
-                                    physTracerNames, bioTracerNames
+                                    physTracerNames, bioTracerNames,         & 
+                                    oneStepPerFile,                          & 
+                                    readMean, readTS, vvl, readBio, readSSH, sgsUV
    namelist /INIT_CASE_DESCRIPTION/ caseName, caseDesc
    namelist /INIT_GRID_SIZE/        imt, jmt, km, nst, subGrid, subGridImin, &
                                     subGridImax, subGridJmin, subGridJmax,   &

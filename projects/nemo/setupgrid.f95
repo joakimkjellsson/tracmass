@@ -1,5 +1,43 @@
 SUBROUTINE setupgrid
-  
+   ! =============================================================
+   ! 
+   ! Purpose
+   ! -------
+   !
+   ! Set up the NEMO mesh, i.e. longitudes, latitudes, cell size etc. 
+   ! 
+   ! Method
+   ! ------
+   !
+   ! Read information about the horizontal and vertical mesh from 
+   ! NEMO output or input files. 
+   ! Four files are needed: 
+   !   coordFile - lon,lat
+   !   hgridFile - e1t,e2t,e1u,e2u etc
+   !   zgridFile - dz (1-D), dzt, dzu, dzv (3D)
+   !   bathyFile - bathymetry
+   ! In NEMO, a file named mesh_mask usually contains all of the above
+   ! except bathymetry. 
+   !
+   ! The following arrays will be populated:
+   !
+   !  dxdy - Horizontal area of cells (T points)
+   !  dz   - Thickness of standard level (T point) 
+   !  dzt  - Time-invariant thickness of level (T point)
+   !  dzu  - Time-invariant thickness of level (U point)
+   !  dzv  - Time-invariant thickness of level (V point)
+   !  kmt  - Number of levels from surface to seafloor (T point)
+   !  kmu  - Number of levels from surface to seafloor (U point)
+   !  kmv  - Number of levels from surface to seafloor (V point)
+   !
+   ! History:
+   ! --------
+   !
+   ! 02.2019:  J.Kjellsson unifies code for all NEMO configurations
+   !
+   !
+   ! -------------------------------------------------------------
+   
    USE mod_precdef
    USE netcdf
    USE mod_param
@@ -12,56 +50,32 @@ SUBROUTINE setupgrid
    USE mod_getfile
    
    IMPLICIT none
-   ! =============================================================
-   !    ===  Set up the grid for ORCA0083 configuration ===
-   ! =============================================================
-   ! Subroutine for defining the grid of the ORCA0083 config. 
-   ! Run once before the loop starts.
-   ! -------------------------------------------------------------
-   ! The following arrays will be populated:
-   !
-   !  dxdy - Horizontal area of cells (T points)
-   !  dz   - Thickness of standard level (T point) 
-   !  dzt  - Time-invariant thickness of level (T point)
-   !  dzu  - Time-invariant thickness of level (U point)
-   !  dzv  - Time-invariant thickness of level (V point)
-   !  kmt  - Number of levels from surface to seafloor (T point)
-   !  kmu  - Number of levels from surface to seafloor (U point)
-   !  kmv  - Number of levels from surface to seafloor (V point)
-   !
-   ! -------------------------------------------------------------
     
    ! === Init local variables for the subroutine ===
    INTEGER                                      :: i ,j ,k, n, kk, ii, &
    &                                               ip, jp, im, jm !! Loop indices
    REAL(DP), SAVE, ALLOCATABLE, DIMENSION(:,:)  :: e1t,e2t        !! dx, dy [m]
-   REAL(DP), ALLOCATABLE, DIMENSION(:,:,:,:)    :: tmp4D
+   REAL(DP), ALLOCATABLE, DIMENSION(:,:,:,:)    :: tmp4d
    CHARACTER (len=200)                          :: gridFile 
    
+   !
+   ! Print some settings
+   !
+   print*,' Read 3D dz:                   ',read3Ddz
+   print*,' Vertical grid is upside down: ',gridIsUpsideDown
+   print*,' Grid data directory:          ',trim(topoDataDir)
+   print*,' Coordinates file:             ',trim(coordFile)
+   print*,' Hor. grid file:               ',trim(hgridFile)
+   print*,' Vert. grid file:              ',trim(zgridFile)
+   print*,' Bathy. file:                  ',trim(bathyFile)
    
+   !
+   ! Set up which positions to read in the netCDF files
+   !
    map2D    = [3, 4,  1, 1 ]
    map3D    = [2, 3,  4, 1 ]
    ncTpos   = 1
-   
-   !
-   ! --- Where are coordinates stored, and horizontal grid, and vertical grid 
-   !
-   !coordFile = trim(topoDataDir)//'/2_INALT60.L120-KRS0020_mesh_mask.*'
-   !hgridFile = trim(topoDataDir)//'/2_INALT60.L120-KRS0020_mesh_mask.*'
-   !zgridFile = trim(topoDataDir)//'/2_INALT60.L120-KRS0020_mesh_mask.*'
-   !bathyFile = trim(topoDataDir)//'/2_INALT60.L120-KRS0020_mesh_mask.*'
-   !dx_name = 'e1t'
-   !dy_name = 'e2t'
-   !dxv_name = 'e1v'
-   !dyu_name = 'e2u'
-   !dz_1D_name = 'e3t_1d'
-   !dzt_3D_name = 'e3t_0'
-   !dzu_3D_name = 'e3u_0'
-   !dzv_3D_name = 'e3v_0'
-   !kBathy_name = 'mbathy'
-   !gridIsUpsideDown = .true.
-   !read3Ddz = .true. 
-      
+         
    !
    ! --- Read dx, dy at T points --- 
    !
@@ -134,13 +148,20 @@ SUBROUTINE setupgrid
       
       print*,'  Reading 3D dz for u,v,t points ' 
       if (gridIsUpsideDown) then
-         dzt0(:,:,km:1:-1)  = get3DfieldNC(trim(topoDataDir)//trim(zgridFile), dzt_3D_name)
-         dzu(:,:,km:1:-1,1) = get3DfieldNC(trim(topoDataDir)//trim(zgridFile), dzu_3D_name)
-         dzv(:,:,km:1:-1,1) = get3DfieldNC(trim(topoDataDir)//trim(zgridFile), dzv_3D_name)
+         allocate ( tmp4d(imt,jmt,km,1) )
+         tmp4d(:,:,:,1) = get3DfieldNC(trim(topoDataDir)//trim(zgridFile), dzt_3D_name)
+         dzt0(:,:,km:1:-1)  = tmp4d(:,:,1:km,1)
+         
+         tmp4d(:,:,:,1) = get3DfieldNC(trim(topoDataDir)//trim(zgridFile), dzu_3D_name)
+         dzu(:,:,km:1:-1,1) = tmp4d(:,:,1:km,1)
+         
+         tmp4d(:,:,:,1) = get3DfieldNC(trim(topoDataDir)//trim(zgridFile), dzv_3D_name)
+         dzv(:,:,km:1:-1,1) = tmp4d(:,:,1:km,1)
+         deallocate( tmp4d )
       else
-         dzt0(:,:,km:1:-1)  = get3DfieldNC(trim(topoDataDir)//trim(zgridFile), dzt_3D_name)
-         dzu(:,:,km:1:-1,1) = get3DfieldNC(trim(topoDataDir)//trim(zgridFile), dzu_3D_name)
-         dzv(:,:,km:1:-1,1) = get3DfieldNC(trim(topoDataDir)//trim(zgridFile), dzv_3D_name)
+         dzt0(:,:,1:km)  = get3DfieldNC(trim(topoDataDir)//trim(zgridFile), dzt_3D_name)
+         dzu(:,:,1:km,1) = get3DfieldNC(trim(topoDataDir)//trim(zgridFile), dzu_3D_name)
+         dzv(:,:,1:km,1) = get3DfieldNC(trim(topoDataDir)//trim(zgridFile), dzv_3D_name)
       end if
       
    else
@@ -149,30 +170,45 @@ SUBROUTINE setupgrid
       print*,'  i.e. no partial steps '
       do j=1,jmt
          do i=1,imt
-            dzt0(i,j,1:km) = dz(1:km)
-            dzu(i,j,1:km,1)   = dz(1:km)
-            dzv(i,j,1:km,1)   = dz(1:km)
+            dzt0(i,j,1:km)  = dz(1:km)
+            dzu(i,j,1:km,1) = dz(1:km)
+            dzv(i,j,1:km,1) = dz(1:km)
          end do
       end do
       
    end if
+   
+   !i = 844
+   !j = 1410
+   !print*,'dzu ',dzu(i,j,:,1)
+   !print*,'dzt ',dzt0(i,j,:)
+   !print*,'dzv ',dzv(i,j,:,1)
+   
       
    !
    ! Ensure thickness is zero in invalid points
    !
    do n=1,2
       do k=1,km
-         where (k > kmt(1:imt,1:jmt))
+         kk = km-k+1
+         where (kk > kmt(1:imt,1:jmt))
             dzt0(:,:,k) = 0
          end where
-         where (k > kmu(1:imt,1:jmt))
+         where (kk > kmu(1:imt,1:jmt))
             dzu(:,:,k,n) = 0
          end where
-         where (k > kmv(1:imt,1:jmt))
+         where (kk > kmv(1:imt,1:jmt))
             dzv(:,:,k,n) = 0
          end where
       enddo 
    end do
-      
+   
+   !do k=1,km
+   !print*,'k, kk, kmu, dzu ',k,kk,kmu(i,j), dzu(i,j,k,1)
+   !end do
+   
+   !i = 844
+   !j = 1410
+   !print*,'dzu2 ',dzu(i,j,:,1)   
    
 end SUBROUTINE setupgrid

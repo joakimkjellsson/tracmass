@@ -2,45 +2,43 @@
       gridvernum =      6,
 /
 &INIT_GRID_DESCRIPTION
-         gcmname = 'NEMO-ORCA1',
+         gcmname = 'NEMO-AGRIF',
        gcmsource = 'http://www.nemo-ocean.eu/',
-        gridname = 'ORCA1.L75',
+        gridname = 'INALT60.L120',
       gridsource = 'http://www.nemo-ocean.eu/',
-        griddesc = 'Global 1 deg run',
+        griddesc = '1/60 deg run for the Agulhas.',
        indatadir = '',
-     topoDataDir = '/sfs/fs1/work-geomar/smomw352/ORCA1-N406/domain/',
-     RunID       = 'ORCA1-N406', 
-     physDataDir = '/sfs/fs1/work-geomar/smomw352/ORCA1-N406/means/',
-     physPrefixForm = 'YYYY/RUNID_YYYYMMDDGRIDX'
+     topoDataDir = '/sfs/fs1/work-geomar/smomw355/hlrn_hannover_sync/smomw244/shkrschu/gfs2/work/shkrschu/SDIR/INALT60.L120/INALT60.L120-KRS0020-S/',
+     RunID       = '2_INALT60.L120-KRS0020_4h', 
+     physDataDir = '/sfs/fs1/work-geomar/smomw355/hlrn_hannover_sync/smomw244/shkrschu/gfs2/work/shkrschu/SDIR/INALT60.L120/INALT60.L120-KRS0020-S/',
+     physPrefixForm = 'RUNID_TSTSTSTS_GRIDX'
      bioDataDir = '', 
      bioPrefixForm = '', 
-     tGridName = 'd05T', 
-     uGridName = 'd05U',
-     vGridName = 'd05V',
+     tGridName = 'grid_T', 
+     uGridName = 'grid_U',
+     vGridName = 'grid_V',
      fileSuffix = '.nc',
      ssh_name = 'sossheig', 
      ueul_name = 'vozocrtx', 
      veul_name = 'vomecrty',
-     usgs_name = 'vozoeivu',
-     vsgs_name = 'vomeeivv',
      temp_name = 'votemper',
      salt_name = 'vosaline',
-     oneStepPerFile = .true.,
+     oneStepPerFile = .false.,
      readMean = .false., 
      readTS = .true., 
      vvl = .true., 
      readBio = .false., 
      readSSH = .true., 
-     sgsUV = .true.,
+     sgsUV = .false.,
 /
 &INIT_CASE_DESCRIPTION
-        casename = 'ORCA1',
-        casedesc = 'Test',
+        casename = 'INALT60',
+        casedesc = 'Agulhas trajectories',
 /
 &INIT_GRID_SIZE
-             imt =   362,
-             jmt =   292,
-              km =     75,
+             imt =   2404,
+             jmt =   1483,
+              km =     53,
              nst =      2,
          subgrid =      0,
      subgridimin =    3529,
@@ -50,19 +48,19 @@
      subgridfile = 'templ.asc',
        subgridid =      0,
        nperio    =      0, 
-       coordFile = 'mesh_hgr.nc'
-     hgridFile = 'mesh_hgr.nc'
-     zgridFile = 'mesh_zgr.nc'
-     bathyFile = 'bathy_level.nc'
+       coordFile = '2_INALT60.L120-KRS0020_mesh_mask.*'
+     hgridFile = '2_INALT60.L120-KRS0020_mesh_mask.*'
+     zgridFile = '2_INALT60.L120-KRS0020_mesh_mask.*'
+     bathyFile = '2_INALT60.L120-KRS0020_mesh_mask.*'
    dx_name = 'e1t'
    dy_name = 'e2t'
    dxv_name = 'e1v'
    dyu_name = 'e2u'
-   dz_1D_name = 'e3t_0'
-   dzt_3D_name = 'e3t'
-   dzu_3D_name = 'e3u'
-   dzv_3D_name = 'e3v'
-   kBathy_name = 'Bathy_level'
+   dz_1D_name = 'e3t_1d'
+   dzt_3D_name = 'e3t_0'
+   dzu_3D_name = 'e3u_0'
+   dzv_3D_name = 'e3v_0'
+   kBathy_name = 'mbathy'
    gridIsUpsideDown = .true.
    read3Ddz = .true. 
 /
@@ -72,31 +70,31 @@
         basehour =      0,
          baseday =      1,
          basemon =      1,
-        baseyear =      1,
-        jdoffset =      4,
+        baseyear =   2010,
+        jdoffset =      0,
 /
 &INIT_GRID_TIME
    fieldsperfile =      1,
-            ngcm =    120,
+            ngcm =      4,
             iter =      1,
           intmax =  15330,
-        minveljd =      1,
-        maxveljd =    120,
+        minveljd =     -1,
+        maxveljd =     -1,
 /
 &INIT_START_DATE
         startsec =      0,
         startmin =      0,
-       starthour =     12,
-        startday =      5,
+       starthour =      2,
+        startday =      1,
         startmon =      1,
-       startyear =   1980,
+       startyear =   2010,
           noleap =  .true., 
-         startjd =     -1,
+         startjd =      0,
           intmin =      1,
 /
 &INIT_RUN_TIME
          intspin =      1,
-          intrun =   73,
+          intrun =   6000,
 /
 &INIT_WRITE_TRAJS
       twritetype =      11,
@@ -109,7 +107,7 @@
   !                 6 = write each spatial grid-crossing 
            kriva =      1,
       outdatadir = '/sfs/fs1/work-geomar/smomw352/',
-     outdatafile = 'orca1_test',
+     outdatafile = 'inalt60_test',
  intmininoutfile =      0,
           intpsi =    10, ! write stream functions and tracer
 /
@@ -122,12 +120,12 @@
         ntracmax = 20000000,
     loneparticle =      0, !2964,
         seedtype =      1,
-            ist1 =   235,
-            ist2 =   237,
-            jst1 =   198,
-            jst2 =   198,
-            kst1 =     70,
-            kst2 =     75,
+            ist1 =   1935,
+            ist2 =   2390,
+            jst1 =   1458,
+            jst2 =   1458,
+            kst1 =      1,
+            kst2 =     53,
             tst1 =     -1,
             tst2 =     -1,
          seeddir =    ' ',
